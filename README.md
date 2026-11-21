@@ -23,16 +23,50 @@
 
 ---
 
-## 📦 What's Inside the GDD
+## 📦 Repository Structure
 
-- ✅ Full Core Game Loop & Progression Flowchart
-- ✅ Character Roster — Calm, Encore, Mo, Sez (stats, moves, damage tables)
-- ✅ HUD Layout & Game Feel rules (hit-stop, screen shake, I-frames)
-- ✅ End-to-end Level Blueprint — all 3 stages, section-by-section
-- ✅ Enemy Roster & AI State Machines
-- ✅ Boss Phase breakdowns (Mutant Noobda — 3 phases + finisher QTE)
-- ✅ Scoring formula, Rank thresholds, Unlock tree
-- ✅ Technical Architecture notes (engine, resolution, systems checklist)
+```
+seedhe-maut-naamcheen-gdd/
+├── GDD.md                         # Complete Game Design Document
+├── README.md                      # Overview & setup instructions
+└── godot_project/                 # Godot 4 (GDScript) Vertical Slice
+    ├── project.godot              # 384x216 pixel-art setup, layers & inputs
+    ├── scripts/
+    │   ├── autoloads/
+    │   │   ├── game_manager.gd    # Score formula, lives, rank calculation (S/A/B/C)
+    │   │   ├── combo_manager.gd   # Dynamic combo meter, timeouts & multipliers
+    │   │   ├── screen_effects.gd  # Hit-stop (40/70ms), screen shake trauma, tints
+    │   │   └── audio_manager.gd   # 8-voice SFX pool & BGM crossfading
+    │   └── components/
+    │       ├── hitbox.gd          # Configurable damage, knockback & hit-stop
+    │       └── hurtbox.gd         # Invincibility frames (0.8s) & blink tweening
+    └── scenes/
+        ├── characters/
+        │   ├── calm.gd            # 3-hit combo, deflect parry, dash-slash
+        │   ├── encore.gd          # 8-dir SMG burst, roll, grenade, minigun
+        │   └── projectile.gd      # Directional / homing missile physics
+        ├── enemies/
+        │   ├── street_grunt.gd    # Baton swing FSM & HP drops
+        │   ├── pistol_thug.gd     # 0.8s laser sight telegraph FSM
+        │   ├── shield_bruiser.gd  # Frontal block, flanking stun, berserk mode
+        │   ├── hp_pickup.gd       # Sine-wave bobbing heal pickup
+        │   └── wave_spawner.gd    # Multi-wave spawner & sequencing
+        ├── stages/
+        │   ├── stage_1.gd         # Section 1A -> 1B -> 1C director
+        │   ├── parallax_manager.gd# 5-layer background parallax system
+        │   └── qte_manager.gd     # Stage 1C Katana Frenzy & Co-Op Finisher QTEs
+        └── ui/
+            ├── hud.gd             # HP/Special bars, combo popups, boss bars
+            └── dialogue_box.gd    # Retro typewriter dialogue system
+```
+
+---
+
+## ⚡ Quick Start with Godot 4
+
+1. Download or open **Godot 4.2+**.
+2. Click **Import** and select `godot_project/project.godot`.
+3. Hit **Play (F5)** to run the vertical slice.
 
 ---
 
