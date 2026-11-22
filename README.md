@@ -23,13 +23,40 @@
 
 ---
 
+## 🌐 Play Immediately in Your Browser!
+
+You don't need Godot or any game engine installed! You can run the entire 16-bit beat-em-up in any modern web browser:
+
+1. Navigate to the `web/` folder.
+2. Double-click or open **`web/index.html`** in Chrome, Edge, Brave, or Firefox.
+3. Select **CALM** or **ENCORE** and start fighting across all 3 stages!
+
+### 🎮 Controls
+
+| Action | Key / Input |
+|---|---|
+| **Move** | `A` / `D` or `Arrow Keys` |
+| **Jump** | `W` or `Up Arrow` (Calm has **Double Jump**) |
+| **Tactical Roll** | `S` or `Down Arrow` (Encore) |
+| **Attack / Fire** | `J` (Katana combo / SMG bursts / Minigun) |
+| **Special Attack** | `K` (Crimson Dash-Slash / Incendiary Grenade) |
+| **Tag Swap** | `L` (Instant switch between Calm & Encore) |
+| **QTE Trigger** | `X` (Press during slow-mo QTE sequences) |
+
+---
+
 ## 📦 Repository Structure
 
 ```
 seedhe-maut-naamcheen-gdd/
 ├── GDD.md                         # Complete Game Design Document
 ├── README.md                      # Overview & setup instructions
-└── godot_project/                 # Godot 4 (GDScript) Vertical Slice
+├── web/                           # 🌐 Instant Playable Web Game (HTML5 Canvas + WebAudio)
+│   ├── index.html                 # Main web container & CRT overlay
+│   ├── style.css                  # Retro arcade styling & animations
+│   └── game.js                    # Complete engine, characters, enemies & boss logic
+└── godot_project/                 # Godot 4 (GDScript) Engine Version
+```
     ├── project.godot              # 384x216 pixel-art setup, layers & inputs
     ├── scripts/
     │   ├── autoloads/

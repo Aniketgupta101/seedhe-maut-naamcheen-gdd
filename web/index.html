@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Seedhe Maut - Naamcheen | 16-Bit Web Brawler</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="game-wrapper">
+    <div id="canvas-container">
+      <canvas id="gameCanvas" width="960" height="540"></canvas>
+      
+      <!-- CRT scanline overlay -->
+      <div id="crt-overlay"></div>
+
+      <!-- Dialogue Box Overlay -->
+      <div id="dialogue-box" class="ui-panel hidden">
+        <div class="avatar-frame">
+          <canvas id="dialogue-avatar" width="64" height="64"></canvas>
+        </div>
+        <div class="dialogue-content">
+          <div id="dialogue-speaker" class="retro-text gold">NOOBDA</div>
+          <div id="dialogue-text" class="retro-text white"></div>
+          <div class="dialogue-hint retro-text dim">[SPACE / J TO ADVANCE]</div>
+        </div>
+      </div>
+
+      <!-- QTE Prompt Overlay -->
+      <div id="qte-prompt" class="hidden">
+        <div class="qte-title retro-text red">⚠️ CRITICAL MOMENT ⚠️</div>
+        <div id="qte-key" class="retro-text yellow glow">PRESS [X] RAPIDLY!</div>
+        <div class="qte-timer-bar"><div id="qte-progress"></div></div>
+      </div>
+
+      <!-- Title / Character Select Overlay -->
+      <div id="menu-overlay" class="overlay-screen">
+        <h1 class="title retro-text red-glow">SEEDHE MAUT</h1>
+        <h2 class="subtitle retro-text cyan">NAAMCHEEN // नामचीन</h2>
+        <p class="tagline retro-text dim">DUSK ROOFTOPS TO ARENA // 16-BIT RETRO BRAWLER</p>
+        
+        <div id="character-select">
+          <div class="char-card active" data-char="calm">
+            <div class="card-title retro-text cyan">CALM</div>
+            <canvas id="calm-preview" width="64" height="64"></canvas>
+            <div class="char-stats retro-text">
+              <span class="gold">KATANA ASSASSIN</span><br>
+              SPD: ★★★★★<br>
+              DEFLECT & DASH
+            </div>
+          </div>
+          <div class="char-card" data-char="encore">
+            <div class="card-title retro-text gold">ENCORE</div>
+            <canvas id="encore-preview" width="64" height="64"></canvas>
+            <div class="char-stats retro-text">
+              <span class="cyan">GUNSLINGER</span><br>
+              RNG: ★★★★★<br>
+              DUAL SMG & MINIGUN
+            </div>
+          </div>
+        </div>
+
+        <button id="btn-start" class="retro-btn pulse">START RUN [ENTER / CLICK]</button>
+
+        <div class="controls-guide retro-text">
+          <span><b>A / D</b>: Move</span> | 
+          <span><b>W</b>: Jump (Double Jump: Calm)</span> | 
+          <span><b>S</b>: Roll (Encore)</span><br>
+          <span><b>J</b>: Attack / Slash / Burst</span> | 
+          <span><b>K</b>: Special (Dash-Slash / Grenade)</span> | 
+          <span><b>L</b>: Tag Swap</span>
+        </div>
+      </div>
+
+      <!-- Game Over / Victory Overlay -->
+      <div id="game-over-overlay" class="overlay-screen hidden">
+        <h1 id="end-title" class="title retro-text red-glow">DEFEAT</h1>
+        <div id="end-stats" class="retro-text white"></div>
+        <button id="btn-restart" class="retro-btn">RETRY RUN</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
