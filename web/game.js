@@ -1,14 +1,47 @@
 /**
- * SEEDHE MAUT - NAAMCHEEN // 16-BIT WEB BRAWLER
- * Full HTML5 Canvas + WebAudio implementation of the GDD.
+ * SEEDHE MAUT - NAAMCHEEN // PRODUCTION 16-BIT WEB BRAWLER
+ * End-to-End implementation of the GDD with real extracted video assets.
  */
 
-// --- 1. AUDIO SYNTHESIZER (8-bit Web Audio API) ---
+// --- 1. ASSET LOADER ---
+const ASSETS = {
+  bgStage1: new Image(),
+  bgStage2: new Image(),
+  bgStage3: new Image(),
+  titleBg: new Image(),
+  portraitCalm: new Image(),
+  portraitEncore: new Image(),
+  portraitNoobda: new Image(),
+  helicopterBoss: new Image(),
+  mutantBoss: new Image()
+};
+
+let assetsLoaded = 0;
+const totalAssets = Object.keys(ASSETS).length;
+
+function loadGameAssets() {
+  ASSETS.bgStage1.src = 'assets/bg_stage1.jpg';
+  ASSETS.bgStage2.src = 'assets/bg_stage2.jpg';
+  ASSETS.bgStage3.src = 'assets/bg_stage3.jpg';
+  ASSETS.titleBg.src = 'assets/title_bg.jpg';
+  ASSETS.portraitCalm.src = 'assets/portrait_calm.jpg';
+  ASSETS.portraitEncore.src = 'assets/portrait_encore.jpg';
+  ASSETS.portraitNoobda.src = 'assets/portrait_noobda.jpg';
+  ASSETS.helicopterBoss.src = 'assets/helicopter_boss.jpg';
+  ASSETS.mutantBoss.src = 'assets/mutant_boss.jpg';
+
+  for (let key in ASSETS) {
+    ASSETS[key].onload = () => {
+      assetsLoaded++;
+    };
+  }
+}
+loadGameAssets();
+
+// --- 2. RETRO 16-BIT AUDIO SYNTHESIZER ---
 class SoundController {
   constructor() {
     this.ctx = null;
-    this.bgmOsc = null;
-    this.bassOsc = null;
     this.isPlayingBGM = false;
     this.step = 0;
   }
@@ -40,87 +73,77 @@ class SoundController {
   }
 
   playSlash() {
-    if (!this.ctx) return;
-    this.playTone(320, 'sawtooth', 0.08, 0.2);
-    setTimeout(() => this.playTone(180, 'triangle', 0.1, 0.15), 30);
+    this.playTone(340, 'sawtooth', 0.08, 0.25);
+    setTimeout(() => this.playTone(180, 'triangle', 0.1, 0.2), 30);
   }
 
   playFinisherSlash() {
-    if (!this.ctx) return;
-    this.playTone(450, 'sawtooth', 0.12, 0.3);
-    setTimeout(() => this.playTone(90, 'triangle', 0.25, 0.4), 40);
+    this.playTone(460, 'sawtooth', 0.12, 0.35);
+    setTimeout(() => this.playTone(90, 'triangle', 0.25, 0.45), 40);
   }
 
   playSMG() {
-    if (!this.ctx) return;
-    this.playTone(600 + Math.random() * 200, 'square', 0.04, 0.1);
+    this.playTone(650 + Math.random() * 200, 'square', 0.04, 0.12);
   }
 
   playMinigun() {
-    if (!this.ctx) return;
-    this.playTone(200 + Math.random() * 150, 'sawtooth', 0.05, 0.18);
+    this.playTone(220 + Math.random() * 150, 'sawtooth', 0.05, 0.2);
   }
 
   playExplosion() {
-    if (!this.ctx) return;
-    this.playTone(80, 'square', 0.3, 0.4);
-    setTimeout(() => this.playTone(40, 'triangle', 0.4, 0.5), 50);
+    this.playTone(70, 'square', 0.35, 0.4);
+    setTimeout(() => this.playTone(35, 'triangle', 0.45, 0.5), 50);
   }
 
   playDeflect() {
-    if (!this.ctx) return;
-    this.playTone(900, 'sine', 0.1, 0.3);
-    setTimeout(() => this.playTone(1400, 'sine', 0.15, 0.3), 30);
+    this.playTone(950, 'sine', 0.1, 0.35);
+    setTimeout(() => this.playTone(1500, 'sine', 0.15, 0.35), 30);
   }
 
   playHit() {
-    if (!this.ctx) return;
-    this.playTone(120, 'triangle', 0.06, 0.2);
+    this.playTone(120, 'triangle', 0.06, 0.25);
   }
 
   startMusicLoop() {
     if (this.isPlayingBGM) return;
     this.isPlayingBGM = true;
     
-    // Indian Drill / Hip Hop style 16-bit arpeggio pattern for Naamcheen
-    const bassNotes = [55, 55, 55, 65, 55, 55, 73, 69]; // D minor flavor
-    const melodyNotes = [220, 261, 293, 329, 293, 261, 220, 196];
+    // Naamcheen Indian drill groove in D minor
+    const bass = [55, 55, 55, 65, 55, 55, 73, 69];
+    const melody = [220, 261, 293, 329, 293, 261, 220, 196];
     
     setInterval(() => {
       if (!this.ctx || this.ctx.state === 'suspended') return;
-      const bFreq = bassNotes[this.step % bassNotes.length];
-      const mFreq = melodyNotes[(this.step * 2) % melodyNotes.length];
+      const bFreq = bass[this.step % bass.length];
+      const mFreq = melody[(this.step * 2) % melody.length];
       
-      // Kick / 808 bass pulse
-      this.playTone(bFreq, 'sawtooth', 0.15, 0.12);
+      // 808 kick pulse
+      this.playTone(bFreq, 'sawtooth', 0.16, 0.14);
       
       // Melody lead pulse
       if (this.step % 2 === 0) {
-        this.playTone(mFreq, 'square', 0.1, 0.05);
+        this.playTone(mFreq, 'square', 0.1, 0.06);
       }
-      
-      // Snare / Hi-hat click
+      // Hi-hat click
       if (this.step % 2 === 1) {
-        this.playTone(800 + Math.random() * 400, 'triangle', 0.03, 0.04);
+        this.playTone(850 + Math.random() * 350, 'triangle', 0.03, 0.05);
       }
-      
       this.step++;
-    }, 200); // 150 BPM drill groove
+    }, 190);
   }
 }
 
 const audio = new SoundController();
 
-// --- 2. GAME ENGINE & STATE ---
+// --- 3. CANVAS & ENGINE CONSTANTS ---
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 ctx.imageSmoothingEnabled = false;
 
 const VIEW_W = 480;
 const VIEW_H = 270;
-const SCALE = 2; // Renders internally at 480x270 for crisp 16-bit retro look
+const SCALE = 2; // Renders 480x270 upscaled to 960x540 for authentic 16-bit look
 
-// Input state
 const keys = {};
 window.addEventListener('keydown', (e) => {
   keys[e.key.toLowerCase()] = true;
@@ -133,16 +156,13 @@ window.addEventListener('keyup', (e) => {
   keys[e.key.toLowerCase()] = false;
 });
 
-// Screen Shake & Hit Stop
+// Screen Effects
 let screenShakeTrauma = 0;
 let hitStopFrames = 0;
 let timeScale = 1.0;
-
-// Camera
 const camera = { x: 0, y: 0 };
-
-// Particle System
 const particles = [];
+
 function addSpark(x, y, color = '#ff0055', count = 6, speed = 3) {
   for (let i = 0; i < count; i++) {
     const angle = Math.random() * Math.PI * 2;
@@ -152,9 +172,9 @@ function addSpark(x, y, color = '#ff0055', count = 6, speed = 3) {
       vx: Math.cos(angle) * spd,
       vy: Math.sin(angle) * spd,
       life: 1.0,
-      decay: 0.05 + Math.random() * 0.05,
+      decay: 0.05 + Math.random() * 0.04,
       color,
-      size: Math.random() * 2 + 1
+      size: Math.random() * 2.5 + 1
     });
   }
 }
@@ -172,7 +192,7 @@ function addTextParticle(x, y, text, color = '#ffeb3b') {
   });
 }
 
-// --- 3. CHARACTERS & COMBAT SYSTEM ---
+// --- 4. COMBAT & PROJECTILE SYSTEM ---
 class Projectile {
   constructor(x, y, vx, vy, damage, isPlayer, isMissile = false, color = '#00e5ff') {
     this.x = x;
@@ -194,8 +214,7 @@ class Projectile {
     this.life--;
     if (this.life <= 0) this.active = false;
     
-    // Trail
-    if (this.isMissile && Math.random() > 0.4) {
+    if (this.isMissile && Math.random() > 0.3) {
       addSpark(this.x, this.y, '#ff5722', 1, 1);
     }
   }
@@ -208,15 +227,16 @@ class Projectile {
   }
 }
 
+// --- 5. PLAYER CONTROLLER (CALM & ENCORE) ---
 class Player {
   constructor() {
     this.charType = 'calm'; // 'calm' or 'encore'
     this.x = 80;
-    this.y = 180;
+    this.y = 190;
     this.vx = 0;
     this.vy = 0;
-    this.w = 16;
-    this.h = 28;
+    this.w = 18;
+    this.h = 30;
     this.facing = 1;
     this.hp = 100;
     this.maxHp = 100;
@@ -227,7 +247,7 @@ class Player {
     this.maxJumps = 2; // Calm has double jump
     this.invulnerableTimer = 0;
     
-    // Combat state
+    // Combo & action state
     this.comboStep = 0;
     this.comboResetTimer = 0;
     this.attackTimer = 0;
@@ -247,15 +267,15 @@ class Player {
     this.maxJumps = this.charType === 'calm' ? 2 : 1;
     addTextParticle(this.x, this.y - 15, `SWAP: ${this.charType.toUpperCase()}`, '#00e5ff');
     addSpark(this.x, this.y, '#00e5ff', 12, 4);
-    audio.playTone(500, 'sine', 0.1, 0.2);
+    audio.playTone(520, 'sine', 0.1, 0.25);
   }
 
   takeDamage(amount) {
     if (this.invulnerableTimer > 0 || this.isDashing || this.isRolling) return;
     this.hp = Math.max(0, this.hp - amount);
     this.invulnerableTimer = 45; // 0.75s i-frame
-    screenShakeTrauma = Math.min(1.0, screenShakeTrauma + 0.4);
-    addSpark(this.x, this.y, '#ff1744', 8, 3);
+    screenShakeTrauma = Math.min(1.0, screenShakeTrauma + 0.45);
+    addSpark(this.x, this.y, '#ff1744', 10, 3.5);
     addTextParticle(this.x, this.y - 10, `-${amount}`, '#ff1744');
     audio.playHit();
     gameState.damageTaken += amount;
@@ -270,31 +290,27 @@ class Player {
     if (this.rollCooldown > 0) this.rollCooldown--;
     if (this.shootCooldown > 0) this.shootCooldown--;
     
-    // Combo buffer decay
     if (this.comboResetTimer > 0) {
       this.comboResetTimer--;
       if (this.comboResetTimer === 0) this.comboStep = 0;
     }
 
-    // Special recharge passive
-    if (this.special < this.maxSpecial && Math.random() < 0.05) {
+    if (this.special < this.maxSpecial && Math.random() < 0.04) {
       this.special += 1;
     }
 
-    // Dash / Roll states
     if (this.isDashing) {
       this.dashTimer--;
-      this.vx = this.facing * 8;
+      this.vx = this.facing * 8.5;
       this.vy = 0;
-      addSpark(this.x, this.y + 10, '#ff0055', 2, 2);
+      addSpark(this.x, this.y + 10, '#ff0055', 3, 2.5);
       if (this.dashTimer <= 0) this.isDashing = false;
     } else if (this.isRolling) {
       this.rollTimer--;
-      this.vx = this.facing * 5.5;
+      this.vx = this.facing * 6.0;
       if (this.rollTimer <= 0) this.isRolling = false;
     } else {
-      // Normal Controls
-      const moveSpd = this.charType === 'calm' ? 3.4 : 3.0;
+      const moveSpd = this.charType === 'calm' ? 3.5 : 3.0;
       if (keys['a'] || keys['arrowleft']) {
         this.vx = -moveSpd;
         this.facing = -1;
@@ -302,7 +318,7 @@ class Player {
         this.vx = moveSpd;
         this.facing = 1;
       } else {
-        this.vx *= 0.7;
+        this.vx *= 0.65;
       }
 
       // Jump
@@ -310,10 +326,10 @@ class Player {
         if (!this.jumpKeyHeld) {
           this.jumpKeyHeld = true;
           if (this.isGrounded || this.jumpCount < this.maxJumps) {
-            this.vy = -7.2;
+            this.vy = -7.4;
             this.jumpCount++;
             this.isGrounded = false;
-            audio.playTone(300, 'triangle', 0.1, 0.1);
+            audio.playTone(320, 'triangle', 0.1, 0.15);
             addSpark(this.x, this.y + this.h / 2, '#fff', 3, 2);
           }
         }
@@ -326,8 +342,8 @@ class Player {
         this.isRolling = true;
         this.rollTimer = 16;
         this.rollCooldown = 60;
-        this.invulnerableTimer = 20;
-        audio.playTone(150, 'triangle', 0.1, 0.2);
+        this.invulnerableTimer = 22;
+        audio.playTone(160, 'triangle', 0.1, 0.2);
       }
 
       // Tag Swap (L)
@@ -348,7 +364,6 @@ class Player {
             this.executeKatanaCombo(stage);
           }
         } else {
-          // Encore continuous / burst
           this.executeGunslingerShot(stage);
         }
       } else {
@@ -366,14 +381,13 @@ class Player {
       }
     }
 
-    // Gravity & Physics
     if (!this.isDashing) {
-      this.vy += 0.38; // Gravity
+      this.vy += 0.4; // Gravity
     }
     this.x += this.vx * timeScale;
     this.y += this.vy * timeScale;
 
-    // Platform Collisions
+    // Platform Collisions (GDD Floor Logic)
     const floorY = stage.getFloorY(this.x);
     if (this.y + this.h / 2 >= floorY) {
       this.y = floorY - this.h / 2;
@@ -382,6 +396,15 @@ class Player {
       this.jumpCount = 0;
     } else {
       this.isGrounded = false;
+    }
+
+    // Gaps in Stage 1 / Stage 2: Falling damage & respawn
+    if (this.y > 260) {
+      this.takeDamage(15);
+      this.x = Math.max(50, this.x - 120);
+      this.y = 170;
+      this.vy = 0;
+      addTextParticle(this.x, this.y - 15, 'GAP FALL! -15 HP', '#ff1744');
     }
 
     // Bounds
@@ -394,31 +417,29 @@ class Player {
     this.comboResetTimer = 35;
     
     const hitBox = {
-      x: this.x + this.facing * 18,
+      x: this.x + this.facing * 20,
       y: this.y,
-      radius: 26,
-      damage: this.comboStep === 3 ? 24 : 12
+      radius: 28,
+      damage: this.comboStep === 3 ? 28 : 14
     };
 
-    // Slash FX
-    addSpark(hitBox.x, hitBox.y, '#ff0055', 8, 3);
+    addSpark(hitBox.x, hitBox.y, '#ff0055', 8, 3.5);
     
-    // Deflect check for enemy projectiles
+    // Parry / Deflect check
     for (let p of stage.projectiles) {
       if (!p.isPlayer && Math.hypot(p.x - hitBox.x, p.y - hitBox.y) < hitBox.radius + 15) {
         p.isPlayer = true;
-        p.vx = this.facing * 9;
+        p.vx = this.facing * 9.5;
         p.vy = (Math.random() - 0.5) * 2;
         p.color = '#00e5ff';
-        p.damage = 35;
+        p.damage = 40;
         audio.playDeflect();
-        addSpark(p.x, p.y, '#ffd700', 10, 4);
-        addTextParticle(p.x, p.y - 10, 'PARRY!', '#ffd700');
+        addSpark(p.x, p.y, '#ffd700', 12, 4);
+        addTextParticle(p.x, p.y - 10, 'BULLET PARRY!', '#ffd700');
         hitStopFrames = 3;
       }
     }
 
-    // Check hit against enemies & boss
     let hitAny = false;
     stage.enemies.forEach(e => {
       if (Math.hypot(e.x - hitBox.x, e.y - hitBox.y) < hitBox.radius + e.w / 2) {
@@ -427,20 +448,20 @@ class Player {
       }
     });
 
-    if (stage.boss && Math.hypot(stage.boss.x - hitBox.x, stage.boss.y - hitBox.y) < hitBox.radius + 30) {
+    if (stage.boss && Math.hypot(stage.boss.x - hitBox.x, stage.boss.y - hitBox.y) < hitBox.radius + 35) {
       stage.boss.takeDamage(hitBox.damage);
       hitAny = true;
     }
 
     if (hitAny) {
       gameState.addHit();
-      this.special = Math.min(this.maxSpecial, this.special + 6);
+      this.special = Math.min(this.maxSpecial, this.special + 7);
       if (this.comboStep === 3) {
         audio.playFinisherSlash();
-        hitStopFrames = 5;
+        hitStopFrames = 4;
         screenShakeTrauma = 0.35;
         // Crescent wave projectile
-        stage.projectiles.push(new Projectile(this.x, this.y, this.facing * 7, 0, 18, true, false, '#ff0055'));
+        stage.projectiles.push(new Projectile(this.x, this.y, this.facing * 7.5, 0, 20, true, false, '#ff0055'));
       } else {
         audio.playSlash();
         hitStopFrames = 2;
@@ -455,7 +476,7 @@ class Player {
     
     if (this.hasMinigun) {
       this.shootCooldown = 4;
-      stage.projectiles.push(new Projectile(this.x + this.facing * 14, this.y - 2, this.facing * 10, (Math.random() - 0.5) * 1.5, 14, true, false, '#ffd700'));
+      stage.projectiles.push(new Projectile(this.x + this.facing * 16, this.y - 2, this.facing * 11, (Math.random() - 0.5) * 1.5, 16, true, false, '#ffd700'));
       audio.playMinigun();
       screenShakeTrauma = Math.min(0.4, screenShakeTrauma + 0.08);
       this.special = Math.min(this.maxSpecial, this.special + 1);
@@ -463,7 +484,7 @@ class Player {
       this.shootCooldown = 12;
       for (let i = 0; i < 3; i++) {
         setTimeout(() => {
-          stage.projectiles.push(new Projectile(this.x + this.facing * 12, this.y - 2, this.facing * 8, (Math.random() - 0.5) * 1, 8, true, false, '#00e5ff'));
+          stage.projectiles.push(new Projectile(this.x + this.facing * 12, this.y - 2, this.facing * 8.5, (Math.random() - 0.5) * 1, 9, true, false, '#00e5ff'));
           audio.playSMG();
           this.special = Math.min(this.maxSpecial, this.special + 2);
         }, i * 40);
@@ -480,47 +501,45 @@ class Player {
     this.special -= 30;
 
     if (this.charType === 'calm') {
-      // Crimson Dash-Slash
       this.isDashing = true;
-      this.dashTimer = 15;
-      this.invulnerableTimer = 20;
-      screenShakeTrauma = 0.5;
+      this.dashTimer = 16;
+      this.invulnerableTimer = 22;
+      screenShakeTrauma = 0.55;
       hitStopFrames = 4;
       audio.playFinisherSlash();
-      addTextParticle(this.x, this.y - 15, 'CRIMSON DASH!', '#ff0055');
+      addTextParticle(this.x, this.y - 15, 'CRIMSON DASH-SLASH!', '#ff0055');
 
       stage.enemies.forEach(e => {
-        if (Math.abs(e.y - this.y) < 30 && (e.x - this.x) * this.facing > 0 && Math.abs(e.x - this.x) < 140) {
-          e.takeDamage(40, this.facing);
+        if (Math.abs(e.y - this.y) < 30 && (e.x - this.x) * this.facing > 0 && Math.abs(e.x - this.x) < 150) {
+          e.takeDamage(45, this.facing);
           gameState.addHit();
         }
       });
-      if (stage.boss && Math.abs(stage.boss.x - this.x) < 140) {
-        stage.boss.takeDamage(40);
+      if (stage.boss && Math.abs(stage.boss.x - this.x) < 150) {
+        stage.boss.takeDamage(45);
         gameState.addHit();
       }
     } else {
-      // Incendiary Grenade
       addTextParticle(this.x, this.y - 15, 'INCENDIARY GRENADE!', '#ff9800');
-      audio.playTone(350, 'sawtooth', 0.2, 0.2);
-      const gx = this.x + this.facing * 80;
+      audio.playTone(360, 'sawtooth', 0.2, 0.25);
+      const gx = this.x + this.facing * 85;
       const gy = this.y;
       
       setTimeout(() => {
         audio.playExplosion();
-        screenShakeTrauma = 0.7;
+        screenShakeTrauma = 0.75;
         hitStopFrames = 6;
-        addSpark(gx, gy, '#ff5722', 25, 6);
-        addSpark(gx, gy, '#ffeb3b', 15, 4);
+        addSpark(gx, gy, '#ff5722', 30, 7);
+        addSpark(gx, gy, '#ffeb3b', 20, 5);
 
         stage.enemies.forEach(e => {
-          if (Math.hypot(e.x - gx, e.y - gy) < 70) {
-            e.takeDamage(55, Math.sign(e.x - gx));
+          if (Math.hypot(e.x - gx, e.y - gy) < 80) {
+            e.takeDamage(60, Math.sign(e.x - gx));
             gameState.addHit();
           }
         });
-        if (stage.boss && Math.hypot(stage.boss.x - gx, stage.boss.y - gy) < 80) {
-          stage.boss.takeDamage(55);
+        if (stage.boss && Math.hypot(stage.boss.x - gx, stage.boss.y - gy) < 90) {
+          stage.boss.takeDamage(60);
           gameState.addHit();
         }
       }, 400);
@@ -528,63 +547,59 @@ class Player {
   }
 
   draw(g) {
-    if (this.invulnerableTimer % 4 > 2) return; // Blink
+    if (this.invulnerableTimer % 4 > 2) return;
     
     const rx = this.x - camera.x;
     const ry = this.y - camera.y;
 
     // Shadow
-    g.fillStyle = 'rgba(0,0,0,0.4)';
+    g.fillStyle = 'rgba(0,0,0,0.45)';
     g.beginPath();
-    g.ellipse(rx, ry + this.h / 2 + 2, 10, 4, 0, 0, Math.PI * 2);
+    g.ellipse(rx, ry + this.h / 2 + 2, 11, 4, 0, 0, Math.PI * 2);
     g.fill();
 
-    // Pixel character silhouette / detail
     if (this.charType === 'calm') {
-      // CALM: Cyan band, dark tactical assassin jacket, katana
-      g.fillStyle = '#1c172d'; // Body
-      g.fillRect(rx - 6, ry - 14, 12, 24);
-      g.fillStyle = '#00e5ff'; // Cyan bandana/headband
-      g.fillRect(rx - 5, ry - 12, 10, 4);
-      g.fillStyle = '#ff0055'; // Crimson scarf/belt
-      g.fillRect(rx - 6, ry + 1, 12, 3);
+      // CALM: Tactical assassin jacket, Katana
+      g.fillStyle = '#1c152d';
+      g.fillRect(rx - 7, ry - 15, 14, 26);
+      g.fillStyle = '#00e5ff'; // Cyan bandana
+      g.fillRect(rx - 6, ry - 13, 12, 5);
+      g.fillStyle = '#ff0055'; // Crimson sash
+      g.fillRect(rx - 7, ry + 1, 14, 4);
       
-      // Katana
-      g.strokeStyle = '#fff';
-      g.lineWidth = 2;
+      // Katana Blade
+      g.strokeStyle = '#ffffff';
+      g.lineWidth = 2.5;
       g.beginPath();
       if (this.comboStep > 0) {
-        // Swing slash pose
         g.moveTo(rx + this.facing * 4, ry - 4);
-        g.lineTo(rx + this.facing * 18, ry + 4);
+        g.lineTo(rx + this.facing * 20, ry + 6);
       } else {
-        // Sheathed back sword
-        g.moveTo(rx - this.facing * 4, ry + 8);
-        g.lineTo(rx - this.facing * 10, ry - 10);
+        g.moveTo(rx - this.facing * 4, ry + 10);
+        g.lineTo(rx - this.facing * 12, ry - 12);
       }
       g.stroke();
     } else {
-      // ENCORE: Gold highlights, streetwear hoodie, dual guns
-      g.fillStyle = '#2a223e'; // Hoodie
-      g.fillRect(rx - 7, ry - 14, 14, 24);
+      // ENCORE: Streetwear hoodie, dual SMGs / Minigun
+      g.fillStyle = '#261e38';
+      g.fillRect(rx - 8, ry - 15, 16, 26);
       g.fillStyle = '#ffd700'; // Gold cap / chain
-      g.fillRect(rx - 5, ry - 14, 10, 4);
-      g.fillStyle = '#ff9800'; // Straps
-      g.fillRect(rx - 7, ry + 2, 14, 2);
+      g.fillRect(rx - 6, ry - 15, 12, 5);
+      g.fillStyle = '#ff9800'; // Orange tactical straps
+      g.fillRect(rx - 8, ry + 2, 16, 3);
 
-      // Guns
-      g.fillStyle = this.hasMinigun ? '#e91e63' : '#9e9e9e';
+      g.fillStyle = this.hasMinigun ? '#e91e63' : '#b0bec5';
       if (this.hasMinigun) {
-        g.fillRect(rx + this.facing * 2, ry - 2, this.facing * 14, 6);
+        g.fillRect(rx + this.facing * 2, ry - 3, this.facing * 16, 7);
       } else {
-        g.fillRect(rx + this.facing * 4, ry - 4, this.facing * 7, 4);
-        g.fillRect(rx + this.facing * 2, ry + 2, this.facing * 6, 4);
+        g.fillRect(rx + this.facing * 4, ry - 5, this.facing * 8, 4);
+        g.fillRect(rx + this.facing * 2, ry + 2, this.facing * 7, 4);
       }
     }
   }
 }
 
-// --- 4. ENEMY TYPES & BOSSES ---
+// --- 6. ENEMY AI & BOSS FIGHTS ---
 class Enemy {
   constructor(x, y, type = 'grunt') {
     this.x = x;
@@ -600,21 +615,21 @@ class Enemy {
     if (type === 'grunt') {
       this.hp = 25;
       this.w = 16;
-      this.h = 26;
+      this.h = 28;
       this.speed = 1.4;
       this.damage = 10;
       this.color = '#7e57c2';
     } else if (type === 'pistol') {
       this.hp = 30;
       this.w = 16;
-      this.h = 26;
+      this.h = 28;
       this.speed = 1.0;
       this.damage = 12;
       this.color = '#26a69a';
     } else if (type === 'shield') {
       this.hp = 70;
       this.w = 20;
-      this.h = 28;
+      this.h = 30;
       this.speed = 0.7;
       this.damage = 16;
       this.color = '#ef5350';
@@ -623,18 +638,17 @@ class Enemy {
   }
 
   takeDamage(amount, hitDir) {
-    // Shield blocks frontal attacks
     if (this.type === 'shield' && this.shieldUp && hitDir !== this.facing) {
-      addTextParticle(this.x, this.y - 12, 'BLOCKED!', '#ffd700');
+      addTextParticle(this.x, this.y - 12, 'SHIELD BLOCKED!', '#ffd700');
       addSpark(this.x, this.y, '#ffd700', 8, 3);
       audio.playTone(800, 'square', 0.05, 0.15);
-      this.shieldUp = false; // Drop shield on heavy flank
-      setTimeout(() => this.shieldUp = true, 800);
+      this.shieldUp = false;
+      setTimeout(() => this.shieldUp = true, 750);
       return;
     }
 
     this.hp -= amount;
-    this.vx = hitDir * 3;
+    this.vx = hitDir * 3.5;
     addSpark(this.x, this.y, this.color, 6, 2.5);
     addTextParticle(this.x, this.y - 10, `-${amount}`, '#fff');
     audio.playHit();
@@ -642,7 +656,7 @@ class Enemy {
     if (this.hp <= 0) {
       this.active = false;
       gameState.kills++;
-      addSpark(this.x, this.y, '#ff0055', 14, 4);
+      addSpark(this.x, this.y, '#ff0055', 15, 4.5);
     }
   }
 
@@ -651,7 +665,7 @@ class Enemy {
     this.facing = Math.sign(player.x - this.x) || -1;
 
     if (this.type === 'grunt') {
-      if (dist > 20) {
+      if (dist > 22) {
         this.x += this.facing * this.speed * timeScale;
       } else {
         this.attackTimer++;
@@ -661,21 +675,20 @@ class Enemy {
         }
       }
     } else if (this.type === 'pistol') {
-      // Reposition / Aim
       if (dist < 120) {
-        this.x -= this.facing * this.speed * timeScale; // Retreat to range
+        this.x -= this.facing * this.speed * timeScale;
       } else if (dist > 220) {
         this.x += this.facing * this.speed * timeScale;
       } else {
         this.aimLaserTimer++;
         if (this.aimLaserTimer >= 50) {
           this.aimLaserTimer = 0;
-          stage.projectiles.push(new Projectile(this.x, this.y - 2, this.facing * 5.5, 0, this.damage, false, false, '#ff1744'));
-          audio.playTone(700, 'sawtooth', 0.05, 0.1);
+          stage.projectiles.push(new Projectile(this.x, this.y - 2, this.facing * 5.8, 0, this.damage, false, false, '#ff1744'));
+          audio.playTone(700, 'sawtooth', 0.05, 0.12);
         }
       }
     } else if (this.type === 'shield') {
-      if (dist > 24) {
+      if (dist > 26) {
         this.x += this.facing * this.speed * timeScale;
       } else {
         this.attackTimer++;
@@ -694,9 +707,8 @@ class Enemy {
     const rx = this.x - camera.x;
     const ry = this.y - camera.y;
 
-    // Laser telegraph
     if (this.type === 'pistol' && this.aimLaserTimer > 20) {
-      g.strokeStyle = 'rgba(255, 23, 68, 0.7)';
+      g.strokeStyle = 'rgba(255, 23, 68, 0.8)';
       g.lineWidth = 1;
       g.setLineDash([4, 2]);
       g.beginPath();
@@ -706,29 +718,25 @@ class Enemy {
       g.setLineDash([]);
     }
 
-    // Shadow
-    g.fillStyle = 'rgba(0,0,0,0.3)';
+    g.fillStyle = 'rgba(0,0,0,0.35)';
     g.beginPath();
     g.ellipse(rx, ry + this.h / 2 + 2, 8, 3, 0, 0, Math.PI * 2);
     g.fill();
 
-    // Body
     g.fillStyle = this.color;
     g.fillRect(rx - this.w / 2, ry - this.h / 2, this.w, this.h);
 
-    // Eyes
     g.fillStyle = '#ff1744';
     g.fillRect(rx + this.facing * 2, ry - 8, 3, 2);
 
-    // Shield prop
     if (this.type === 'shield' && this.shieldUp) {
       g.fillStyle = '#b0bec5';
-      g.fillRect(rx + this.facing * 8, ry - 14, 4, 28);
+      g.fillRect(rx + this.facing * 8, ry - 14, 5, 28);
     }
   }
 }
 
-// Stage 2 Attack Chopper Mini-Boss
+// Stage 2 Helicopter Mini-Boss
 class ChopperBoss {
   constructor(x, y) {
     this.x = x;
@@ -737,40 +745,37 @@ class ChopperBoss {
     this.maxHp = 300;
     this.active = true;
     this.timer = 0;
-    this.phase = 'hover'; // 'hover', 'missile', 'sweep'
   }
 
   takeDamage(amount) {
     this.hp -= amount;
-    addSpark(this.x, this.y, '#ff1744', 8, 3);
+    addSpark(this.x, this.y, '#ff1744', 8, 3.5);
     addTextParticle(this.x, this.y - 15, `-${amount}`, '#ff9800');
     audio.playHit();
     if (this.hp <= 0) {
       this.active = false;
       audio.playExplosion();
       screenShakeTrauma = 1.0;
-      addSpark(this.x, this.y, '#ff5722', 40, 8);
+      addSpark(this.x, this.y, '#ff5722', 45, 8);
     }
   }
 
   update(player, stage) {
     this.timer++;
-    this.x = camera.x + 360 + Math.sin(this.timer * 0.05) * 40;
-    this.y = 80 + Math.cos(this.timer * 0.04) * 20;
+    this.x = camera.x + 360 + Math.sin(this.timer * 0.05) * 45;
+    this.y = 80 + Math.cos(this.timer * 0.04) * 22;
 
-    if (this.timer % 90 === 0) {
-      // Fire homing missile
-      audio.playTone(250, 'square', 0.2, 0.2);
+    if (this.timer % 85 === 0) {
+      audio.playTone(250, 'square', 0.2, 0.25);
       const angle = Math.atan2(player.y - this.y, player.x - this.x);
-      stage.projectiles.push(new Projectile(this.x, this.y, Math.cos(angle) * 3.5, Math.sin(angle) * 3.5, 20, false, true, '#ff5722'));
+      stage.projectiles.push(new Projectile(this.x, this.y, Math.cos(angle) * 3.6, Math.sin(angle) * 3.6, 20, false, true, '#ff5722'));
     }
 
-    if (this.timer % 140 === 0) {
-      // Machine gun sweep
+    if (this.timer % 130 === 0) {
       for (let i = 0; i < 4; i++) {
         setTimeout(() => {
-          stage.projectiles.push(new Projectile(this.x - 20, this.y + 10, -5, 2 + i * 0.4, 12, false, false, '#ffeb3b'));
-          audio.playTone(550, 'sawtooth', 0.04, 0.1);
+          stage.projectiles.push(new Projectile(this.x - 20, this.y + 10, -5.5, 2 + i * 0.4, 12, false, false, '#ffeb3b'));
+          audio.playTone(550, 'sawtooth', 0.04, 0.12);
         }, i * 60);
       }
     }
@@ -780,15 +785,15 @@ class ChopperBoss {
     const rx = this.x - camera.x;
     const ry = this.y - camera.y;
 
-    // Helicopter body
-    g.fillStyle = '#b71c1c';
-    g.fillRect(rx - 30, ry - 14, 60, 24);
-    // Rotor blade spinning
-    g.fillStyle = '#e0e0e0';
-    g.fillRect(rx - 45 + (Math.sin(this.timer * 0.8) * 10), ry - 22, 90, 4);
-    // Cockpit
-    g.fillStyle = '#00e5ff';
-    g.fillRect(rx - 24, ry - 10, 16, 12);
+    // Use extracted production helicopter asset if loaded
+    if (ASSETS.helicopterBoss.complete) {
+      g.drawImage(ASSETS.helicopterBoss, rx - 60, ry - 30, 120, 60);
+    } else {
+      g.fillStyle = '#b71c1c';
+      g.fillRect(rx - 30, ry - 14, 60, 24);
+      g.fillStyle = '#e0e0e0';
+      g.fillRect(rx - 45 + (Math.sin(this.timer * 0.8) * 10), ry - 22, 90, 4);
+    }
   }
 }
 
@@ -800,17 +805,17 @@ class MutantNoobda {
     this.hp = 600;
     this.maxHp = 600;
     this.active = true;
-    this.w = 34;
-    this.h = 48;
+    this.w = 38;
+    this.h = 52;
     this.facing = -1;
     this.timer = 0;
-    this.state = 'idle'; // 'idle', 'leap', 'charge', 'beam'
+    this.state = 'idle';
     this.beamTimer = 0;
   }
 
   takeDamage(amount) {
     this.hp -= amount;
-    addSpark(this.x, this.y, '#e91e63', 6, 3);
+    addSpark(this.x, this.y, '#e91e63', 7, 3);
     addTextParticle(this.x, this.y - 20, `-${amount}`, '#ff0055');
     audio.playHit();
     if (this.hp <= 90 && !gameState.qteTriggered) {
@@ -822,7 +827,6 @@ class MutantNoobda {
     this.timer++;
     this.facing = Math.sign(player.x - this.x) || -1;
 
-    // Boss Phase Cycle
     if (this.state === 'idle') {
       if (this.timer % 120 === 0) {
         const rand = Math.random();
@@ -841,31 +845,27 @@ class MutantNoobda {
       }
     } else if (this.state === 'charge') {
       this.chargeTimer--;
-      this.x += this.facing * 4.5 * timeScale;
-      if (Math.abs(player.x - this.x) < 28 && Math.abs(player.y - this.y) < 30) {
+      this.x += this.facing * 4.6 * timeScale;
+      if (Math.abs(player.x - this.x) < 30 && Math.abs(player.y - this.y) < 30) {
         player.takeDamage(24);
       }
       if (this.chargeTimer <= 0) this.state = 'idle';
     } else if (this.state === 'leap') {
       this.leapTimer--;
       if (this.leapTimer === 25) {
-        // Crash down
         this.x = player.x;
         audio.playExplosion();
-        screenShakeTrauma = 0.8;
-        addSpark(this.x, this.y + this.h / 2, '#9c27b0', 25, 6);
-        // Low shockwave
-        stage.projectiles.push(new Projectile(this.x, this.y + 15, -4.5, 0, 18, false, false, '#9c27b0'));
-        stage.projectiles.push(new Projectile(this.x, this.y + 15, 4.5, 0, 18, false, false, '#9c27b0'));
+        screenShakeTrauma = 0.85;
+        addSpark(this.x, this.y + this.h / 2, '#9c27b0', 28, 6.5);
+        stage.projectiles.push(new Projectile(this.x, this.y + 15, -4.8, 0, 18, false, false, '#9c27b0'));
+        stage.projectiles.push(new Projectile(this.x, this.y + 15, 4.8, 0, 18, false, false, '#9c27b0'));
       }
       if (this.leapTimer <= 0) this.state = 'idle';
     } else if (this.state === 'beam') {
       this.beamTimer--;
-      // Chest Laser
       if (this.beamTimer > 15 && this.beamTimer < 45) {
-        const beamX = this.x + this.facing * 120;
         if (Math.abs(player.y - this.y) < 25 && (player.x - this.x) * this.facing > 0 && Math.abs(player.x - this.x) < 240) {
-          player.takeDamage(4);
+          player.takeDamage(5);
         }
       }
       if (this.beamTimer <= 0) this.state = 'idle';
@@ -876,34 +876,30 @@ class MutantNoobda {
     const rx = this.x - camera.x;
     const ry = this.y - camera.y;
 
-    // Beam graphic
     if (this.state === 'beam' && this.beamTimer > 15 && this.beamTimer < 45) {
-      g.fillStyle = 'rgba(233, 30, 99, 0.8)';
+      g.fillStyle = 'rgba(233, 30, 99, 0.85)';
       g.fillRect(rx + (this.facing > 0 ? 10 : -240), ry - 6, 240, 12);
-      g.fillStyle = '#fff';
+      g.fillStyle = '#ffffff';
       g.fillRect(rx + (this.facing > 0 ? 10 : -240), ry - 2, 240, 4);
     }
 
-    // Shadow
-    g.fillStyle = 'rgba(0,0,0,0.4)';
+    g.fillStyle = 'rgba(0,0,0,0.45)';
     g.beginPath();
-    g.ellipse(rx, ry + this.h / 2 + 2, 16, 6, 0, 0, Math.PI * 2);
+    g.ellipse(rx, ry + this.h / 2 + 2, 18, 6, 0, 0, Math.PI * 2);
     g.fill();
 
-    // Hulking Mutant Pixel Sprite
-    g.fillStyle = '#4a148c'; // Dark mutagen muscle
-    g.fillRect(rx - 16, ry - 24, 32, 48);
-    g.fillStyle = '#76ff03'; // Mutagen green veins
-    g.fillRect(rx - 12, ry - 14, 24, 4);
-    g.fillRect(rx - 10, ry + 2, 20, 3);
-    
-    // Glowing red eyes
-    g.fillStyle = '#ff1744';
-    g.fillRect(rx + this.facing * 4, ry - 18, 5, 3);
+    if (ASSETS.mutantBoss.complete) {
+      g.drawImage(ASSETS.mutantBoss, rx - 35, ry - 35, 70, 70);
+    } else {
+      g.fillStyle = '#4a148c';
+      g.fillRect(rx - 18, ry - 26, 36, 52);
+      g.fillStyle = '#76ff03';
+      g.fillRect(rx - 14, ry - 14, 28, 4);
+    }
   }
 }
 
-// --- 5. STAGE BLUEPRINT & PARALLAX ---
+// --- 7. STAGE BLUEPRINTS & PRODUCTION PARALLAX ---
 class StageBlueprint {
   constructor(stageNum) {
     this.stageNum = stageNum;
@@ -911,43 +907,36 @@ class StageBlueprint {
     this.enemies = [];
     this.projectiles = [];
     this.boss = null;
-    this.spawnIndex = 0;
     this.initEnemies();
   }
 
   getFloorY(x) {
     if (this.stageNum === 1) {
-      // Stage 1 Rooftop & gaps
-      if (x > 500 && x < 620) return 320; // Falling gap
-      if (x > 1050 && x < 1180) return 320;
+      if (x > 500 && x < 610) return 320; // Rooftop gap 1
+      if (x > 1050 && x < 1170) return 320; // Rooftop gap 2
       return 210;
     } else if (this.stageNum === 2) {
-      // Moving Metro Train roof
-      return 200;
+      return 200; // Metro train top
     } else {
-      // Arena Stage
-      return 210;
+      return 210; // Arena stage floor
     }
   }
 
   initEnemies() {
     if (this.stageNum === 1) {
-      // Section 1A: Entry
       this.enemies.push(new Enemy(260, 200, 'grunt'));
-      this.enemies.push(new Enemy(340, 200, 'grunt'));
-      this.enemies.push(new Enemy(440, 200, 'pistol'));
-      // Section 1B: Cranes
-      this.enemies.push(new Enemy(720, 200, 'grunt'));
-      this.enemies.push(new Enemy(820, 200, 'shield'));
-      this.enemies.push(new Enemy(960, 200, 'pistol'));
-      // Section 1C: Mob before Taunt
-      this.enemies.push(new Enemy(1250, 200, 'grunt'));
-      this.enemies.push(new Enemy(1320, 200, 'grunt'));
-      this.enemies.push(new Enemy(1400, 200, 'shield'));
+      this.enemies.push(new Enemy(360, 200, 'grunt'));
+      this.enemies.push(new Enemy(460, 200, 'pistol'));
+      this.enemies.push(new Enemy(740, 200, 'grunt'));
+      this.enemies.push(new Enemy(840, 200, 'shield'));
+      this.enemies.push(new Enemy(980, 200, 'pistol'));
+      this.enemies.push(new Enemy(1260, 200, 'grunt'));
+      this.enemies.push(new Enemy(1340, 200, 'grunt'));
+      this.enemies.push(new Enemy(1420, 200, 'shield'));
     } else if (this.stageNum === 2) {
       this.enemies.push(new Enemy(280, 190, 'grunt'));
-      this.enemies.push(new Enemy(420, 190, 'shield'));
-      this.enemies.push(new Enemy(600, 190, 'pistol'));
+      this.enemies.push(new Enemy(440, 190, 'shield'));
+      this.enemies.push(new Enemy(620, 190, 'pistol'));
       this.boss = new ChopperBoss(600, 80);
     } else if (this.stageNum === 3) {
       this.boss = new MutantNoobda(400, 190);
@@ -959,73 +948,75 @@ class StageBlueprint {
     const midOffset = camera.x * 0.45;
 
     if (this.stageNum === 1) {
-      // Dusk Rooftops (GDD Palette: #2D1B69 -> #FF6B35)
-      const grad = g.createLinearGradient(0, 0, 0, VIEW_H);
-      grad.addColorStop(0, '#1a0e36');
-      grad.addColorStop(0.5, '#4a154b');
-      grad.addColorStop(1, '#ff6b35');
-      g.fillStyle = grad;
-      g.fillRect(0, 0, VIEW_W, VIEW_H);
-
-      // Distant City Skyline
-      g.fillStyle = '#170c29';
-      for (let i = 0; i < 20; i++) {
-        const bx = i * 60 - (bgOffset % 60);
-        const bh = 70 + (i % 4) * 25;
-        g.fillRect(bx, VIEW_H - bh - 60, 48, bh);
+      // Production Rooftops Dusk from Naamcheen video
+      if (ASSETS.bgStage1.complete) {
+        g.drawImage(ASSETS.bgStage1, 0, 0, VIEW_W, VIEW_H);
+      } else {
+        const grad = g.createLinearGradient(0, 0, 0, VIEW_H);
+        grad.addColorStop(0, '#1a0e36');
+        grad.addColorStop(0.5, '#4a154b');
+        grad.addColorStop(1, '#ff6b35');
+        g.fillStyle = grad;
+        g.fillRect(0, 0, VIEW_W, VIEW_H);
       }
 
-      // Neon Billboards & Water Towers
+      // Rooftop Walkways & Gap Platforms
+      g.fillStyle = '#1c132f';
+      g.fillRect(0 - camera.x, 210 - camera.y, 500, 70);
+      g.fillRect(610 - camera.x, 210 - camera.y, 440, 70);
+      g.fillRect(1170 - camera.x, 210 - camera.y, 430, 70);
+
       g.fillStyle = '#ff0055';
-      g.fillRect(180 - midOffset, 70, 40, 14);
-      g.fillStyle = '#00e5ff';
-      g.fillRect(400 - midOffset, 60, 50, 12);
+      g.fillRect(0 - camera.x, 210 - camera.y, 500, 3);
+      g.fillRect(610 - camera.x, 210 - camera.y, 440, 3);
+      g.fillRect(1170 - camera.x, 210 - camera.y, 430, 3);
 
-      // Rooftops Surface
-      g.fillStyle = '#22193b';
-      g.fillRect(0 - camera.x, 210 - camera.y, this.length, 70);
-      g.fillStyle = '#392a5c';
-      g.fillRect(0 - camera.x, 210 - camera.y, this.length, 4);
     } else if (this.stageNum === 2) {
-      // Sunset Metro Train (Fast auto-scroll)
-      const grad = g.createLinearGradient(0, 0, 0, VIEW_H);
-      grad.addColorStop(0, '#bf360c');
-      grad.addColorStop(0.6, '#ff8f00');
-      grad.addColorStop(1, '#ffeb3b');
-      g.fillStyle = grad;
-      g.fillRect(0, 0, VIEW_W, VIEW_H);
+      // Production Metro Train Sunset from Naamcheen video
+      if (ASSETS.bgStage2.complete) {
+        g.drawImage(ASSETS.bgStage2, 0, 0, VIEW_W, VIEW_H);
+      } else {
+        const grad = g.createLinearGradient(0, 0, 0, VIEW_H);
+        grad.addColorStop(0, '#bf360c');
+        grad.addColorStop(0.6, '#ff8f00');
+        grad.addColorStop(1, '#ffeb3b');
+        g.fillStyle = grad;
+        g.fillRect(0, 0, VIEW_W, VIEW_H);
+      }
 
-      // Train car roof
-      g.fillStyle = '#37474f';
+      // Train roof surface
+      g.fillStyle = '#263238';
       g.fillRect(0 - camera.x, 200 - camera.y, this.length, 80);
-      g.fillStyle = '#b0bec5';
-      g.fillRect(0 - camera.x, 200 - camera.y, this.length, 4);
-    } else {
-      // Stage 3 Live Concert Arena
-      g.fillStyle = '#0d081a';
-      g.fillRect(0, 0, VIEW_W, VIEW_H);
+      g.fillStyle = '#ffd700';
+      g.fillRect(0 - camera.x, 200 - camera.y, this.length, 3);
 
-      // Sweeping Stage Spotlights
-      g.fillStyle = 'rgba(0, 229, 255, 0.15)';
+    } else {
+      // Production Concert Stage from Naamcheen video
+      if (ASSETS.bgStage3.complete) {
+        g.drawImage(ASSETS.bgStage3, 0, 0, VIEW_W, VIEW_H);
+      } else {
+        g.fillStyle = '#0d081a';
+        g.fillRect(0, 0, VIEW_W, VIEW_H);
+      }
+
+      // Dynamic Spotlights
+      g.fillStyle = 'rgba(0, 229, 255, 0.16)';
       g.beginPath();
       g.moveTo(VIEW_W / 2, 0);
-      g.lineTo(VIEW_W / 2 - 120 + Math.sin(Date.now() * 0.003) * 100, VIEW_H);
-      g.lineTo(VIEW_W / 2 + 120 + Math.sin(Date.now() * 0.003) * 100, VIEW_H);
+      g.lineTo(VIEW_W / 2 - 130 + Math.sin(Date.now() * 0.003) * 110, VIEW_H);
+      g.lineTo(VIEW_W / 2 + 130 + Math.sin(Date.now() * 0.003) * 110, VIEW_H);
       g.fill();
 
-      // Speaker Stacks
-      g.fillStyle = '#1b132c';
-      g.fillRect(20 - camera.x, 100 - camera.y, 40, 110);
-      g.fillRect(420 - camera.x, 100 - camera.y, 40, 110);
-
-      // Stage floor
-      g.fillStyle = '#2a1a44';
+      // Concert Stage Floor
+      g.fillStyle = '#1b122e';
       g.fillRect(0 - camera.x, 210 - camera.y, this.length, 70);
+      g.fillStyle = '#00e5ff';
+      g.fillRect(0 - camera.x, 210 - camera.y, this.length, 3);
     }
   }
 }
 
-// --- 6. GAME CONTROLLER, HUD & RUNTIME LOOP ---
+// --- 8. STATE MANAGER & FLOW CONTROLLER ---
 class GameState {
   constructor() {
     this.stageNum = 1;
@@ -1038,7 +1029,7 @@ class GameState {
     this.kills = 0;
     this.damageTaken = 0;
     this.startTime = 0;
-    this.state = 'menu'; // 'menu', 'playing', 'dialogue', 'qte', 'gameover'
+    this.state = 'menu';
     this.qteTriggered = false;
   }
 
@@ -1058,24 +1049,37 @@ class GameState {
     
     document.getElementById('menu-overlay').classList.add('hidden');
     document.getElementById('game-over-overlay').classList.add('hidden');
+    document.getElementById('stage-clear-banner').classList.add('hidden');
+
+    // Stage 1 Opening Dialogue from GDD
+    setTimeout(() => {
+      this.triggerDialogue(
+        'NOOBDA',
+        'So you two actually showed up. You think you run this city? We will bury you right here on these roofs.',
+        'assets/portrait_noobda.jpg'
+      );
+    }, 500);
   }
 
   addHit() {
     this.combo++;
     if (this.combo > this.maxCombo) this.maxCombo = this.combo;
-    this.comboTimer = 90; // 1.5s window
+    this.comboTimer = 90;
     const multiplier = this.combo >= 30 ? 3.0 : (this.combo >= 20 ? 2.0 : (this.combo >= 10 ? 1.5 : 1.0));
     this.score += Math.round(50 * multiplier);
   }
 
-  triggerDialogue(speaker, text, callback) {
+  triggerDialogue(speaker, text, avatarSrc, callback) {
     this.state = 'dialogue';
     const box = document.getElementById('dialogue-box');
     const speakerEl = document.getElementById('dialogue-speaker');
     const textEl = document.getElementById('dialogue-text');
+    const avatarImg = document.getElementById('dialogue-avatar-img');
+    
     box.classList.remove('hidden');
     speakerEl.innerText = speaker;
     textEl.innerText = text;
+    if (avatarSrc) avatarImg.src = avatarSrc;
 
     const onAdvance = (e) => {
       if (e.key === ' ' || e.key.toLowerCase() === 'j') {
@@ -1116,7 +1120,7 @@ class GameState {
         timeScale = 1.0;
         this.state = 'playing';
         
-        // Success: Co-Op Finisher Cinematic Explosion
+        // Final Co-Op Finisher
         audio.playFinisherSlash();
         audio.playExplosion();
         screenShakeTrauma = 1.0;
@@ -1135,13 +1139,40 @@ class GameState {
       this.gameOver(true);
       return;
     }
-    this.stage = new StageBlueprint(this.stageNum);
-    this.player.x = 80;
-    this.player.y = 180;
-    if (this.stageNum === 2) {
-      this.player.hasMinigun = true; // Stage 2 Minigun drop
-      addTextParticle(this.player.x, this.player.y - 20, 'MINIGUN CRATE EQUIPPED!', '#ffd700');
-    }
+
+    // Show Stage Clear Banner
+    const banner = document.getElementById('stage-clear-banner');
+    const title = document.getElementById('stage-clear-title');
+    const sub = document.getElementById('stage-clear-sub');
+    
+    banner.classList.remove('hidden');
+    title.innerText = `STAGE ${this.stageNum - 1} CLEARED!`;
+    sub.innerText = this.stageNum === 2 ? 'BOARDING SUNSET METRO TRAIN...' : 'ENTERING LIVE CONCERT ARENA...';
+    
+    audio.playTone(600, 'triangle', 0.3, 0.3);
+
+    setTimeout(() => {
+      banner.classList.add('hidden');
+      this.stage = new StageBlueprint(this.stageNum);
+      this.player.x = 80;
+      this.player.y = 180;
+      
+      if (this.stageNum === 2) {
+        this.player.hasMinigun = true; // Minigun crate pickup
+        addTextParticle(this.player.x, this.player.y - 20, 'MINIGUN CRATE EQUIPPED!', '#ffd700');
+        this.triggerDialogue(
+          'ENCORE',
+          'Heavy ordnance air-drop confirmed. Chopper in inbound—light em up!',
+          'assets/portrait_encore.jpg'
+        );
+      } else if (this.stageNum === 3) {
+        this.triggerDialogue(
+          'CALM',
+          'Concert stage secured. Noobda is cornered with the mutagen—take him down together!',
+          'assets/portrait_calm.jpg'
+        );
+      }
+    }, 1800);
   }
 
   gameOver(victory) {
@@ -1158,18 +1189,18 @@ class GameState {
     title.className = `title retro-text ${victory ? 'gold' : 'red-glow'}`;
 
     stats.innerHTML = `
-      <p>FINAL SCORE: <span class="cyan">${this.score}</span></p>
-      <p>MAX COMBO: <span class="gold">${this.maxCombo}x</span></p>
-      <p>ENEMIES DEFEATED: <span class="white">${this.kills}</span></p>
-      <p>TIME: <span class="yellow">${Math.floor(totalSeconds / 60)}m ${totalSeconds % 60}s</span></p>
-      <p>OVERALL RANK: <span class="red-glow" style="font-size: 20px;">${rank}</span></p>
+      <p style="margin-bottom: 8px;">FINAL SCORE: <span class="cyan">${this.score}</span></p>
+      <p style="margin-bottom: 8px;">MAX COMBO: <span class="gold">${this.maxCombo}x</span></p>
+      <p style="margin-bottom: 8px;">ENEMIES DEFEATED: <span class="white">${this.kills}</span></p>
+      <p style="margin-bottom: 8px;">TIME: <span class="yellow">${Math.floor(totalSeconds / 60)}m ${totalSeconds % 60}s</span></p>
+      <p style="margin-top: 14px;">OVERALL RANK: <span class="red-glow" style="font-size: 22px;">★ ${rank} ★</span></p>
     `;
   }
 }
 
 const gameState = new GameState();
 
-// UI Button Listeners
+// UI Interactions
 document.querySelectorAll('.char-card').forEach(card => {
   card.addEventListener('click', () => {
     document.querySelectorAll('.char-card').forEach(c => c.classList.remove('active'));
@@ -1188,11 +1219,10 @@ document.getElementById('btn-restart').addEventListener('click', () => {
   gameState.state = 'menu';
 });
 
-// Main Animation Loop
+// --- 9. MAIN GAME LOOP ---
 function gameLoop() {
   requestAnimationFrame(gameLoop);
 
-  // Hit-stop freeze
   if (hitStopFrames > 0) {
     hitStopFrames--;
     return;
@@ -1201,7 +1231,7 @@ function gameLoop() {
   ctx.save();
   ctx.scale(SCALE, SCALE);
 
-  // Screen Shake
+  // Screen Shake Trauma
   if (screenShakeTrauma > 0) {
     const shakeX = (Math.random() - 0.5) * screenShakeTrauma * 12;
     const shakeY = (Math.random() - 0.5) * screenShakeTrauma * 12;
@@ -1213,56 +1243,49 @@ function gameLoop() {
     const p = gameState.player;
     const stage = gameState.stage;
 
-    // Update
     if (gameState.state === 'playing') {
       p.update(stage);
 
-      // Camera lerp
       camera.x += (p.x - VIEW_W / 2 - camera.x) * 0.1;
       camera.x = Math.max(0, Math.min(stage.length - VIEW_W, camera.x));
 
-      // Combo Decay
       if (gameState.comboTimer > 0) {
         gameState.comboTimer--;
         if (gameState.comboTimer === 0) gameState.combo = 0;
       }
 
-      // Enemies
       stage.enemies = stage.enemies.filter(e => e.active);
       stage.enemies.forEach(e => e.update(p, stage));
 
-      // Bosses
       if (stage.boss && stage.boss.active) {
         stage.boss.update(p, stage);
       }
 
-      // Projectiles
       stage.projectiles = stage.projectiles.filter(proj => proj.active);
       stage.projectiles.forEach(proj => {
         proj.update();
-        // Check collisions
         if (proj.isPlayer) {
           stage.enemies.forEach(e => {
-            if (Math.hypot(e.x - proj.x, e.y - proj.y) < 16) {
+            if (Math.hypot(e.x - proj.x, e.y - proj.y) < 18) {
               e.takeDamage(proj.damage, Math.sign(proj.vx));
               proj.active = false;
               gameState.addHit();
             }
           });
-          if (stage.boss && Math.hypot(stage.boss.x - proj.x, stage.boss.y - proj.y) < 28) {
+          if (stage.boss && Math.hypot(stage.boss.x - proj.x, stage.boss.y - proj.y) < 32) {
             stage.boss.takeDamage(proj.damage);
             proj.active = false;
             gameState.addHit();
           }
         } else {
-          if (Math.hypot(p.x - proj.x, p.y - proj.y) < 14) {
+          if (Math.hypot(p.x - proj.x, p.y - proj.y) < 15) {
             p.takeDamage(proj.damage);
             proj.active = false;
           }
         }
       });
 
-      // Stage Progression trigger
+      // Advance stage when enemies and boss are cleared
       if (stage.enemies.length === 0 && (!stage.boss || !stage.boss.active)) {
         if (p.x >= stage.length - 80) {
           gameState.nextStage();
@@ -1270,10 +1293,7 @@ function gameLoop() {
       }
     }
 
-    // Render Stage Parallax & Floor
     stage.drawParallax(ctx);
-
-    // Render Entities
     stage.enemies.forEach(e => e.draw(ctx));
     if (stage.boss && stage.boss.active) stage.boss.draw(ctx);
     p.draw(ctx);
@@ -1304,72 +1324,43 @@ function gameLoop() {
       ctx.restore();
     }
 
-    // --- HUD RENDER (Top Bar) ---
-    // P1 Health Bar
-    ctx.fillStyle = '#22193b';
-    ctx.fillRect(10, 10, 80, 8);
+    // --- HUD (Top Left & Center) ---
+    ctx.fillStyle = '#1c132d';
+    ctx.fillRect(10, 10, 90, 8);
     ctx.fillStyle = '#ff1744';
-    ctx.fillRect(10, 10, (p.hp / p.maxHp) * 80, 8);
+    ctx.fillRect(10, 10, (p.hp / p.maxHp) * 90, 8);
     ctx.strokeStyle = '#fff';
-    ctx.strokeRect(10, 10, 80, 8);
+    ctx.strokeRect(10, 10, 90, 8);
 
-    // Special Meter
-    ctx.fillStyle = '#102027';
-    ctx.fillRect(10, 20, 60, 4);
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(10, 20, 65, 4);
     ctx.fillStyle = '#00e5ff';
-    ctx.fillRect(10, 20, (p.special / p.maxSpecial) * 60, 4);
+    ctx.fillRect(10, 20, (p.special / p.maxSpecial) * 65, 4);
 
-    // Active Character Label
     ctx.font = '7px "Press Start 2P"';
     ctx.fillStyle = p.charType === 'calm' ? '#00e5ff' : '#ffd700';
     ctx.fillText(`${p.charType.toUpperCase()} [${p.hasMinigun ? 'MINIGUN' : (p.charType === 'calm' ? 'KATANA' : 'SMG')}]`, 10, 32);
 
-    // Combo Counter
     if (gameState.combo > 1) {
       ctx.font = '9px "Press Start 2P"';
       ctx.fillStyle = '#ffeb3b';
       ctx.fillText(`${gameState.combo}x HIT!`, VIEW_W / 2 - 25, 20);
     }
 
-    // Boss Bar if active
     if (stage.boss && stage.boss.active) {
-      ctx.fillStyle = '#22193b';
-      ctx.fillRect(VIEW_W / 2 - 60, 32, 120, 6);
+      ctx.fillStyle = '#1c132d';
+      ctx.fillRect(VIEW_W / 2 - 65, 30, 130, 7);
       ctx.fillStyle = '#ff0055';
-      ctx.fillRect(VIEW_W / 2 - 60, 32, (stage.boss.hp / stage.boss.maxHp) * 120, 6);
+      ctx.fillRect(VIEW_W / 2 - 65, 30, (stage.boss.hp / stage.boss.maxHp) * 130, 7);
       ctx.strokeStyle = '#fff';
-      ctx.strokeRect(VIEW_W / 2 - 60, 32, 120, 6);
+      ctx.strokeRect(VIEW_W / 2 - 65, 30, 130, 7);
       ctx.font = '6px "Press Start 2P"';
       ctx.fillStyle = '#fff';
-      ctx.fillText(stage.stageNum === 2 ? 'RED ATTACK CHOPPER' : 'MUTANT NOOBDA', VIEW_W / 2 - 40, 46);
+      ctx.fillText(stage.stageNum === 2 ? 'ATTACK CHOPPER' : 'MUTANT NOOBDA', VIEW_W / 2 - 42, 45);
     }
   }
 
   ctx.restore();
 }
 
-// Draw preview avatars on cards
-function drawPreviews() {
-  const cCanvas = document.getElementById('calm-preview');
-  const cCtx = cCanvas.getContext('2d');
-  cCtx.imageSmoothingEnabled = false;
-  cCtx.fillStyle = '#1c172d';
-  cCtx.fillRect(20, 14, 24, 36);
-  cCtx.fillStyle = '#00e5ff';
-  cCtx.fillRect(20, 18, 24, 6);
-  cCtx.fillStyle = '#ff0055';
-  cCtx.fillRect(20, 32, 24, 4);
-
-  const eCanvas = document.getElementById('encore-preview');
-  const eCtx = eCanvas.getContext('2d');
-  eCtx.imageSmoothingEnabled = false;
-  eCtx.fillStyle = '#2a223e';
-  eCtx.fillRect(20, 14, 24, 36);
-  eCtx.fillStyle = '#ffd700';
-  eCtx.fillRect(20, 16, 24, 6);
-  eCtx.fillStyle = '#ff9800';
-  eCtx.fillRect(20, 34, 24, 4);
-}
-
-drawPreviews();
 requestAnimationFrame(gameLoop);
