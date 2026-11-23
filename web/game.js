@@ -1,55 +1,110 @@
 /**
- * SEEDHE MAUT - NAAMCHEEN // PRODUCTION 16-BIT WEB BRAWLER
- * Full authentic asset integration (Calm, Encore, Grunts, Pistol Thugs, Shields, Chopper, Mutant Noobda)
+ * SEEDHE MAUT - NAAMCHEEN // END-TO-END PRODUCTION 16-BIT RETRO GAME
+ * Real Animated Character Sprites & Authentic Video Cinema Integration
  */
 
-// --- 1. ASSET LOADER ---
+// --- 1. ASSET PRELOADER (CINEMA & MULTI-FRAME SPRITES) ---
 const ASSETS = {
-  // Background Scenarios
+  // Backgrounds
   bgStage1: new Image(),
   bgStage2: new Image(),
   bgStage3: new Image(),
   titleBg: new Image(),
-  
-  // High-Res Character Dialogue Portraits
+
+  // Dialogue Portraits
   portraitCalm: new Image(),
   portraitEncore: new Image(),
   portraitNoobda: new Image(),
-  
-  // Real In-Game Extracted Character & Enemy Sprites
-  spriteCalm: new Image(),
-  spriteCalmAttack: new Image(),
-  spriteEncore: new Image(),
-  spriteEncoreShoot: new Image(),
-  spriteEnemyGrunt: new Image(),
-  spriteEnemyPistol: new Image(),
-  spriteEnemyShield: new Image(),
-  spriteChopper: new Image(),
-  spriteMutantNoobda: new Image()
+
+  // Calm Multi-Frame Sprites
+  calmRun: [new Image(), new Image()],
+  calmSlash: [new Image(), new Image()],
+
+  // Encore Multi-Frame Sprites
+  encoreRun: [new Image(), new Image()],
+  encoreShoot: [new Image(), new Image()],
+
+  // Enemy Multi-Frame Sprites
+  grunt: [new Image(), new Image()],
+  pistol: new Image(),
+  shield: new Image(),
+
+  // Boss Multi-Frame Sprites
+  chopper: [new Image(), new Image()],
+  mutant: [new Image(), new Image()],
+
+  // Video Cutscene Sequences
+  cinema: {
+    intro: [],
+    s1_frenzy: [],
+    noobda_taunt: [],
+    train_speed: [],
+    chopper_fight: [],
+    concert_stage: [],
+    mutant_roar: [],
+    coop_finisher: []
+  }
 };
 
-function loadGameAssets() {
+function initAssetLoader() {
   ASSETS.bgStage1.src = 'assets/bg_stage1.jpg';
   ASSETS.bgStage2.src = 'assets/bg_stage2.jpg';
   ASSETS.bgStage3.src = 'assets/bg_stage3.jpg';
   ASSETS.titleBg.src = 'assets/title_bg.jpg';
+
   ASSETS.portraitCalm.src = 'assets/portrait_calm.jpg';
   ASSETS.portraitEncore.src = 'assets/portrait_encore.jpg';
   ASSETS.portraitNoobda.src = 'assets/portrait_noobda.jpg';
 
-  ASSETS.spriteCalm.src = 'sprites/sprite_calm.png';
-  ASSETS.spriteCalmAttack.src = 'sprites/sprite_calm_attack.png';
-  ASSETS.spriteEncore.src = 'sprites/sprite_encore.png';
-  ASSETS.spriteEncoreShoot.src = 'sprites/sprite_encore_shoot.png';
-  ASSETS.spriteEnemyGrunt.src = 'sprites/sprite_enemy_grunt.png';
-  ASSETS.spriteEnemyPistol.src = 'sprites/sprite_enemy_pistol.png';
-  ASSETS.spriteEnemyShield.src = 'sprites/sprite_enemy_shield.png';
-  ASSETS.spriteChopper.src = 'sprites/sprite_chopper.png';
-  ASSETS.spriteMutantNoobda.src = 'sprites/sprite_mutant_noobda.png';
-}
-loadGameAssets();
+  // Calm
+  ASSETS.calmRun[0].src = 'sprites/calm_run_0.png';
+  ASSETS.calmRun[1].src = 'sprites/calm_run_1.png';
+  ASSETS.calmSlash[0].src = 'sprites/calm_slash_0.png';
+  ASSETS.calmSlash[1].src = 'sprites/calm_slash_1.png';
 
-// --- 2. 16-BIT RETRO SYNTHESIZER ---
+  // Encore
+  ASSETS.encoreRun[0].src = 'sprites/encore_run_0.png';
+  ASSETS.encoreRun[1].src = 'sprites/encore_run_1.png';
+  ASSETS.encoreShoot[0].src = 'sprites/encore_shoot_0.png';
+  ASSETS.encoreShoot[1].src = 'sprites/encore_shoot_1.png';
+
+  // Enemies
+  ASSETS.grunt[0].src = 'sprites/grunt_0.png';
+  ASSETS.grunt[1].src = 'sprites/grunt_1.png';
+  ASSETS.pistol.src = 'sprites/sprite_enemy_pistol.png';
+  ASSETS.shield.src = 'sprites/sprite_enemy_shield.png';
+
+  // Bosses
+  ASSETS.chopper[0].src = 'sprites/chopper_0.png';
+  ASSETS.chopper[1].src = 'sprites/chopper_1.png';
+  ASSETS.mutant[0].src = 'sprites/mutant_0.png';
+  ASSETS.mutant[1].src = 'sprites/mutant_1.png';
+
+  // Cinema Sequences
+  const seqCounts = {
+    intro: 7,
+    s1_frenzy: 13,
+    noobda_taunt: 10,
+    train_speed: 13,
+    chopper_fight: 13,
+    concert_stage: 13,
+    mutant_roar: 13,
+    coop_finisher: 15
+  };
+
+  for (let seq in seqCounts) {
+    const count = seqCounts[seq];
+    for (let i = 0; i < count; i++) {
+      const img = new Image();
+      const numStr = i < 10 ? `0${i}` : `${i}`;
+      img.src = `cinema/${seq}/${numStr}.jpg`;
+      ASSETS.cinema[seq].push(img);
+    }
+  }
+}
+initAssetLoader();
+
+// --- 2. 16-BIT AUDIO CONTROLLER ---
 class SoundController {
   constructor() {
     this.ctx = null;
@@ -119,7 +174,7 @@ class SoundController {
     if (this.isPlayingBGM) return;
     this.isPlayingBGM = true;
     
-    // Naamcheen drill groove pattern
+    // Naamcheen Indian drill groove
     const bass = [55, 55, 55, 65, 55, 55, 73, 69];
     const melody = [220, 261, 293, 329, 293, 261, 220, 196];
     
@@ -142,7 +197,7 @@ class SoundController {
 
 const audio = new SoundController();
 
-// --- 3. CANVAS & ENGINE SETUP ---
+// --- 3. ENGINE SETUP ---
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 ctx.imageSmoothingEnabled = false;
@@ -168,6 +223,7 @@ let hitStopFrames = 0;
 let timeScale = 1.0;
 const camera = { x: 0, y: 0 };
 const particles = [];
+let animTick = 0;
 
 function addSpark(x, y, color = '#ff0055', count = 6, speed = 3) {
   for (let i = 0; i < count; i++) {
@@ -198,7 +254,7 @@ function addTextParticle(x, y, text, color = '#ffeb3b') {
   });
 }
 
-// --- 4. PROJECTILE SYSTEM ---
+// --- 4. PROJECTILES ---
 class Projectile {
   constructor(x, y, vx, vy, damage, isPlayer, isMissile = false, color = '#00e5ff') {
     this.x = x;
@@ -242,7 +298,7 @@ class Player {
     this.vx = 0;
     this.vy = 0;
     this.w = 26;
-    this.h = 42;
+    this.h = 44;
     this.facing = 1;
     this.hp = 100;
     this.maxHp = 100;
@@ -392,7 +448,7 @@ class Player {
     this.x += this.vx * timeScale;
     this.y += this.vy * timeScale;
 
-    // Platform Collisions
+    // Floor Platform Check
     const floorY = stage.getFloorY(this.x);
     if (this.y + this.h / 2 >= floorY) {
       this.y = floorY - this.h / 2;
@@ -403,7 +459,7 @@ class Player {
       this.isGrounded = false;
     }
 
-    // Gap Fall
+    // Gap Fall penalty
     if (this.y > 260) {
       this.takeDamage(15);
       this.x = Math.max(50, this.x - 120);
@@ -563,31 +619,32 @@ class Player {
     g.ellipse(rx, ry + this.h / 2 + 3, 14, 5, 0, 0, Math.PI * 2);
     g.fill();
 
-    // RENDER AUTHENTIC EXTRACTED SPRITE
     g.save();
     g.translate(rx, ry);
     if (this.facing < 0) {
       g.scale(-1, 1);
     }
 
+    const frameIdx = Math.floor(animTick / 10) % 2;
+
     if (this.charType === 'calm') {
-      const spr = (this.attackTimer > 0 && ASSETS.spriteCalmAttack.complete) 
-        ? ASSETS.spriteCalmAttack 
-        : ASSETS.spriteCalm;
+      const spr = (this.attackTimer > 0)
+        ? ASSETS.calmSlash[frameIdx]
+        : (Math.abs(this.vx) > 0.5 ? ASSETS.calmRun[frameIdx] : ASSETS.calmRun[0]);
         
-      if (spr.complete) {
-        g.drawImage(spr, -24, -26, 48, 52);
+      if (spr && spr.complete) {
+        g.drawImage(spr, -26, -28, 52, 56);
       } else {
         g.fillStyle = '#00e5ff';
         g.fillRect(-10, -20, 20, 40);
       }
     } else {
-      const spr = (this.attackTimer > 0 && ASSETS.spriteEncoreShoot.complete) 
-        ? ASSETS.spriteEncoreShoot 
-        : ASSETS.spriteEncore;
+      const spr = (this.attackTimer > 0)
+        ? ASSETS.encoreShoot[frameIdx]
+        : (Math.abs(this.vx) > 0.5 ? ASSETS.encoreRun[frameIdx] : ASSETS.encoreRun[0]);
 
-      if (spr.complete) {
-        g.drawImage(spr, -24, -26, 48, 52);
+      if (spr && spr.complete) {
+        g.drawImage(spr, -26, -28, 52, 56);
       } else {
         g.fillStyle = '#ffd700';
         g.fillRect(-10, -20, 20, 40);
@@ -597,7 +654,7 @@ class Player {
   }
 }
 
-// --- 6. ENEMY ROSTER (GRUNT, PISTOL THUG, SHIELD BRUISER) ---
+// --- 6. ENEMY CONTROLLER ---
 class Enemy {
   constructor(x, y, type = 'grunt') {
     this.x = x;
@@ -718,19 +775,19 @@ class Enemy {
     g.ellipse(rx, ry + this.h / 2 + 2, 12, 4, 0, 0, Math.PI * 2);
     g.fill();
 
-    // RENDER EXTRACTED ENEMY SPRITES
     g.save();
     g.translate(rx, ry);
     if (this.facing < 0) {
       g.scale(-1, 1);
     }
 
-    let spr = ASSETS.spriteEnemyGrunt;
-    if (this.type === 'pistol') spr = ASSETS.spriteEnemyPistol;
-    if (this.type === 'shield') spr = ASSETS.spriteEnemyShield;
+    const frameIdx = Math.floor(animTick / 10) % 2;
+    let spr = ASSETS.grunt[frameIdx];
+    if (this.type === 'pistol') spr = ASSETS.pistol;
+    if (this.type === 'shield') spr = ASSETS.shield;
 
-    if (spr.complete) {
-      g.drawImage(spr, -22, -26, 44, 52);
+    if (spr && spr.complete) {
+      g.drawImage(spr, -24, -28, 48, 56);
     } else {
       g.fillStyle = '#7e57c2';
       g.fillRect(-10, -20, 20, 40);
@@ -789,8 +846,11 @@ class ChopperBoss {
     const rx = this.x - camera.x;
     const ry = this.y - camera.y;
 
-    if (ASSETS.spriteChopper.complete) {
-      g.drawImage(ASSETS.spriteChopper, rx - 70, ry - 35, 140, 70);
+    const frameIdx = Math.floor(animTick / 6) % 2;
+    const spr = ASSETS.chopper[frameIdx];
+
+    if (spr && spr.complete) {
+      g.drawImage(spr, rx - 75, ry - 38, 150, 76);
     } else {
       g.fillStyle = '#b71c1c';
       g.fillRect(rx - 35, ry - 16, 70, 28);
@@ -895,8 +955,11 @@ class MutantNoobda {
       g.scale(-1, 1);
     }
 
-    if (ASSETS.spriteMutantNoobda.complete) {
-      g.drawImage(ASSETS.spriteMutantNoobda, -36, -36, 72, 72);
+    const frameIdx = Math.floor(animTick / 8) % 2;
+    const spr = ASSETS.mutant[frameIdx];
+
+    if (spr && spr.complete) {
+      g.drawImage(spr, -40, -40, 80, 80);
     } else {
       g.fillStyle = '#4a148c';
       g.fillRect(-20, -30, 40, 60);
@@ -905,7 +968,7 @@ class MutantNoobda {
   }
 }
 
-// --- 7. STAGE BLUEPRINT & PARALLAX ---
+// --- 7. STAGE BLUEPRINT ---
 class StageBlueprint {
   constructor(stageNum) {
     this.stageNum = stageNum;
@@ -953,16 +1016,7 @@ class StageBlueprint {
     if (this.stageNum === 1) {
       if (ASSETS.bgStage1.complete) {
         g.drawImage(ASSETS.bgStage1, 0, 0, VIEW_W, VIEW_H);
-      } else {
-        const grad = g.createLinearGradient(0, 0, 0, VIEW_H);
-        grad.addColorStop(0, '#1a0e36');
-        grad.addColorStop(0.5, '#4a154b');
-        grad.addColorStop(1, '#ff6b35');
-        g.fillStyle = grad;
-        g.fillRect(0, 0, VIEW_W, VIEW_H);
       }
-
-      // Rooftop Walkways & Gap Platforms
       g.fillStyle = '#1c132f';
       g.fillRect(0 - camera.x, 210 - camera.y, 500, 70);
       g.fillRect(610 - camera.x, 210 - camera.y, 440, 70);
@@ -976,15 +1030,7 @@ class StageBlueprint {
     } else if (this.stageNum === 2) {
       if (ASSETS.bgStage2.complete) {
         g.drawImage(ASSETS.bgStage2, 0, 0, VIEW_W, VIEW_H);
-      } else {
-        const grad = g.createLinearGradient(0, 0, 0, VIEW_H);
-        grad.addColorStop(0, '#bf360c');
-        grad.addColorStop(0.6, '#ff8f00');
-        grad.addColorStop(1, '#ffeb3b');
-        g.fillStyle = grad;
-        g.fillRect(0, 0, VIEW_W, VIEW_H);
       }
-
       g.fillStyle = '#263238';
       g.fillRect(0 - camera.x, 200 - camera.y, this.length, 80);
       g.fillStyle = '#ffd700';
@@ -993,11 +1039,7 @@ class StageBlueprint {
     } else {
       if (ASSETS.bgStage3.complete) {
         g.drawImage(ASSETS.bgStage3, 0, 0, VIEW_W, VIEW_H);
-      } else {
-        g.fillStyle = '#0d081a';
-        g.fillRect(0, 0, VIEW_W, VIEW_H);
       }
-
       g.fillStyle = 'rgba(0, 229, 255, 0.16)';
       g.beginPath();
       g.moveTo(VIEW_W / 2, 0);
@@ -1013,7 +1055,7 @@ class StageBlueprint {
   }
 }
 
-// --- 8. STATE MANAGER ---
+// --- 8. STATE MANAGER & CINEMATIC ORCHESTRATION ---
 class GameState {
   constructor() {
     this.stageNum = 1;
@@ -1028,6 +1070,21 @@ class GameState {
     this.startTime = 0;
     this.state = 'menu';
     this.qteTriggered = false;
+
+    // Cinematic playback state
+    this.activeCinema = null;
+    this.cinemaIndex = 0;
+    this.cinemaTimer = 0;
+    this.cinemaCallback = null;
+  }
+
+  playCinema(seqName, fps = 8, callback = null) {
+    this.state = 'cinema';
+    this.activeCinema = ASSETS.cinema[seqName];
+    this.cinemaIndex = 0;
+    this.cinemaTimer = 0;
+    this.cinemaFPS = fps;
+    this.cinemaCallback = callback;
   }
 
   startRun(charType = 'calm') {
@@ -1041,20 +1098,23 @@ class GameState {
     this.player.charType = charType;
     this.player.maxJumps = charType === 'calm' ? 2 : 1;
     this.stage = new StageBlueprint(this.stageNum);
-    this.state = 'playing';
     this.qteTriggered = false;
     
     document.getElementById('menu-overlay').classList.add('hidden');
     document.getElementById('game-over-overlay').classList.add('hidden');
     document.getElementById('stage-clear-banner').classList.add('hidden');
 
-    setTimeout(() => {
-      this.triggerDialogue(
-        'NOOBDA',
-        'So you two actually showed up. You think you run this city? We will bury you right here on these roofs.',
-        'assets/portrait_noobda.jpg'
-      );
-    }, 500);
+    // Play Authentic Opening Video Sequence
+    this.playCinema('intro', 6, () => {
+      this.state = 'playing';
+      setTimeout(() => {
+        this.triggerDialogue(
+          'NOOBDA',
+          'So you two actually showed up. Delhi is not big enough for your ego... we bury you on these roofs.',
+          'assets/portrait_noobda.jpg'
+        );
+      }, 300);
+    });
   }
 
   addHit() {
@@ -1114,15 +1174,14 @@ class GameState {
         clearInterval(interval);
         qteEl.classList.add('hidden');
         timeScale = 1.0;
-        this.state = 'playing';
         
+        // Play Authentic Co-Op Finisher Video Cutscene!
         audio.playFinisherSlash();
         audio.playExplosion();
         screenShakeTrauma = 1.0;
-        hitStopFrames = 15;
-        this.stage.boss.hp = 0;
-        this.stage.boss.active = false;
-        setTimeout(() => this.gameOver(true), 1200);
+        this.playCinema('coop_finisher', 8, () => {
+          this.gameOver(true);
+        });
       }
     };
     window.addEventListener('keydown', onQTE);
@@ -1145,28 +1204,33 @@ class GameState {
     
     audio.playTone(600, 'triangle', 0.3, 0.3);
 
+    // Play Cutscene sequence between stages
     setTimeout(() => {
       banner.classList.add('hidden');
-      this.stage = new StageBlueprint(this.stageNum);
-      this.player.x = 80;
-      this.player.y = 180;
-      
-      if (this.stageNum === 2) {
-        this.player.hasMinigun = true;
-        addTextParticle(this.player.x, this.player.y - 20, 'MINIGUN CRATE EQUIPPED!', '#ffd700');
-        this.triggerDialogue(
-          'ENCORE',
-          'Heavy ordnance air-drop confirmed. Chopper in inbound—light em up!',
-          'assets/portrait_encore.jpg'
-        );
-      } else if (this.stageNum === 3) {
-        this.triggerDialogue(
-          'CALM',
-          'Concert stage secured. Noobda is cornered with the mutagen—take him down together!',
-          'assets/portrait_calm.jpg'
-        );
-      }
-    }, 1800);
+      const seq = this.stageNum === 2 ? 'train_speed' : 'concert_stage';
+      this.playCinema(seq, 8, () => {
+        this.stage = new StageBlueprint(this.stageNum);
+        this.player.x = 80;
+        this.player.y = 180;
+        this.state = 'playing';
+        
+        if (this.stageNum === 2) {
+          this.player.hasMinigun = true;
+          addTextParticle(this.player.x, this.player.y - 20, 'MINIGUN CRATE EQUIPPED!', '#ffd700');
+          this.triggerDialogue(
+            'ENCORE',
+            'Heavy ordnance air-drop confirmed. Chopper in inbound—light em up!',
+            'assets/portrait_encore.jpg'
+          );
+        } else if (this.stageNum === 3) {
+          this.triggerDialogue(
+            'CALM',
+            'Concert stage secured. Noobda is cornered with the mutagen—take him down together!',
+            'assets/portrait_calm.jpg'
+          );
+        }
+      });
+    }, 1600);
   }
 
   gameOver(victory) {
@@ -1213,9 +1277,10 @@ document.getElementById('btn-restart').addEventListener('click', () => {
   gameState.state = 'menu';
 });
 
-// --- 9. MAIN GAME LOOP ---
+// --- 9. MAIN RUNTIME LOOP ---
 function gameLoop() {
   requestAnimationFrame(gameLoop);
+  animTick++;
 
   if (hitStopFrames > 0) {
     hitStopFrames--;
@@ -1225,6 +1290,7 @@ function gameLoop() {
   ctx.save();
   ctx.scale(SCALE, SCALE);
 
+  // Screen Shake
   if (screenShakeTrauma > 0) {
     const shakeX = (Math.random() - 0.5) * screenShakeTrauma * 12;
     const shakeY = (Math.random() - 0.5) * screenShakeTrauma * 12;
@@ -1232,6 +1298,29 @@ function gameLoop() {
     screenShakeTrauma = Math.max(0, screenShakeTrauma - 0.05);
   }
 
+  // A. CINEMA PLAYBACK MODE (Video Frames)
+  if (gameState.state === 'cinema' && gameState.activeCinema) {
+    const frameImg = gameState.activeCinema[gameState.cinemaIndex];
+    if (frameImg && frameImg.complete) {
+      ctx.drawImage(frameImg, 0, 0, VIEW_W, VIEW_H);
+    }
+
+    gameState.cinemaTimer++;
+    if (gameState.cinemaTimer % Math.floor(60 / gameState.cinemaFPS) === 0) {
+      gameState.cinemaIndex++;
+      if (gameState.cinemaIndex >= gameState.activeCinema.length) {
+        if (gameState.cinemaCallback) {
+          gameState.cinemaCallback();
+        } else {
+          gameState.state = 'playing';
+        }
+      }
+    }
+    ctx.restore();
+    return;
+  }
+
+  // B. GAMEPLAY MODE
   if (gameState.state === 'playing' || gameState.state === 'dialogue' || gameState.state === 'qte') {
     const p = gameState.player;
     const stage = gameState.stage;
@@ -1259,13 +1348,13 @@ function gameLoop() {
         proj.update();
         if (proj.isPlayer) {
           stage.enemies.forEach(e => {
-            if (Math.hypot(e.x - proj.x, e.y - proj.y) < 20) {
+            if (Math.hypot(e.x - proj.x, e.y - proj.y) < 22) {
               e.takeDamage(proj.damage, Math.sign(proj.vx));
               proj.active = false;
               gameState.addHit();
             }
           });
-          if (stage.boss && Math.hypot(stage.boss.x - proj.x, stage.boss.y - proj.y) < 35) {
+          if (stage.boss && Math.hypot(stage.boss.x - proj.x, stage.boss.y - proj.y) < 38) {
             stage.boss.takeDamage(proj.damage);
             proj.active = false;
             gameState.addHit();
@@ -1291,7 +1380,7 @@ function gameLoop() {
     p.draw(ctx);
     stage.projectiles.forEach(proj => proj.draw(ctx));
 
-    // Render Particles
+    // Particle FX
     for (let i = particles.length - 1; i >= 0; i--) {
       const pt = particles[i];
       pt.x += pt.vx;
@@ -1316,7 +1405,7 @@ function gameLoop() {
       ctx.restore();
     }
 
-    // --- HUD RENDER ---
+    // --- HUD ---
     ctx.fillStyle = '#1c132d';
     ctx.fillRect(10, 10, 90, 8);
     ctx.fillStyle = '#ff1744';
