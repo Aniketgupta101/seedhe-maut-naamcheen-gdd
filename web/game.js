@@ -1,23 +1,32 @@
 /**
  * SEEDHE MAUT - NAAMCHEEN // PRODUCTION 16-BIT WEB BRAWLER
- * End-to-End implementation of the GDD with real extracted video assets.
+ * Full authentic asset integration (Calm, Encore, Grunts, Pistol Thugs, Shields, Chopper, Mutant Noobda)
  */
 
 // --- 1. ASSET LOADER ---
 const ASSETS = {
+  // Background Scenarios
   bgStage1: new Image(),
   bgStage2: new Image(),
   bgStage3: new Image(),
   titleBg: new Image(),
+  
+  // High-Res Character Dialogue Portraits
   portraitCalm: new Image(),
   portraitEncore: new Image(),
   portraitNoobda: new Image(),
-  helicopterBoss: new Image(),
-  mutantBoss: new Image()
+  
+  // Real In-Game Extracted Character & Enemy Sprites
+  spriteCalm: new Image(),
+  spriteCalmAttack: new Image(),
+  spriteEncore: new Image(),
+  spriteEncoreShoot: new Image(),
+  spriteEnemyGrunt: new Image(),
+  spriteEnemyPistol: new Image(),
+  spriteEnemyShield: new Image(),
+  spriteChopper: new Image(),
+  spriteMutantNoobda: new Image()
 };
-
-let assetsLoaded = 0;
-const totalAssets = Object.keys(ASSETS).length;
 
 function loadGameAssets() {
   ASSETS.bgStage1.src = 'assets/bg_stage1.jpg';
@@ -27,18 +36,20 @@ function loadGameAssets() {
   ASSETS.portraitCalm.src = 'assets/portrait_calm.jpg';
   ASSETS.portraitEncore.src = 'assets/portrait_encore.jpg';
   ASSETS.portraitNoobda.src = 'assets/portrait_noobda.jpg';
-  ASSETS.helicopterBoss.src = 'assets/helicopter_boss.jpg';
-  ASSETS.mutantBoss.src = 'assets/mutant_boss.jpg';
 
-  for (let key in ASSETS) {
-    ASSETS[key].onload = () => {
-      assetsLoaded++;
-    };
-  }
+  ASSETS.spriteCalm.src = 'sprites/sprite_calm.png';
+  ASSETS.spriteCalmAttack.src = 'sprites/sprite_calm_attack.png';
+  ASSETS.spriteEncore.src = 'sprites/sprite_encore.png';
+  ASSETS.spriteEncoreShoot.src = 'sprites/sprite_encore_shoot.png';
+  ASSETS.spriteEnemyGrunt.src = 'sprites/sprite_enemy_grunt.png';
+  ASSETS.spriteEnemyPistol.src = 'sprites/sprite_enemy_pistol.png';
+  ASSETS.spriteEnemyShield.src = 'sprites/sprite_enemy_shield.png';
+  ASSETS.spriteChopper.src = 'sprites/sprite_chopper.png';
+  ASSETS.spriteMutantNoobda.src = 'sprites/sprite_mutant_noobda.png';
 }
 loadGameAssets();
 
-// --- 2. RETRO 16-BIT AUDIO SYNTHESIZER ---
+// --- 2. 16-BIT RETRO SYNTHESIZER ---
 class SoundController {
   constructor() {
     this.ctx = null;
@@ -108,7 +119,7 @@ class SoundController {
     if (this.isPlayingBGM) return;
     this.isPlayingBGM = true;
     
-    // Naamcheen Indian drill groove in D minor
+    // Naamcheen drill groove pattern
     const bass = [55, 55, 55, 65, 55, 55, 73, 69];
     const melody = [220, 261, 293, 329, 293, 261, 220, 196];
     
@@ -117,14 +128,10 @@ class SoundController {
       const bFreq = bass[this.step % bass.length];
       const mFreq = melody[(this.step * 2) % melody.length];
       
-      // 808 kick pulse
       this.playTone(bFreq, 'sawtooth', 0.16, 0.14);
-      
-      // Melody lead pulse
       if (this.step % 2 === 0) {
         this.playTone(mFreq, 'square', 0.1, 0.06);
       }
-      // Hi-hat click
       if (this.step % 2 === 1) {
         this.playTone(850 + Math.random() * 350, 'triangle', 0.03, 0.05);
       }
@@ -135,14 +142,14 @@ class SoundController {
 
 const audio = new SoundController();
 
-// --- 3. CANVAS & ENGINE CONSTANTS ---
+// --- 3. CANVAS & ENGINE SETUP ---
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 ctx.imageSmoothingEnabled = false;
 
 const VIEW_W = 480;
 const VIEW_H = 270;
-const SCALE = 2; // Renders 480x270 upscaled to 960x540 for authentic 16-bit look
+const SCALE = 2;
 
 const keys = {};
 window.addEventListener('keydown', (e) => {
@@ -156,7 +163,6 @@ window.addEventListener('keyup', (e) => {
   keys[e.key.toLowerCase()] = false;
 });
 
-// Screen Effects
 let screenShakeTrauma = 0;
 let hitStopFrames = 0;
 let timeScale = 1.0;
@@ -192,7 +198,7 @@ function addTextParticle(x, y, text, color = '#ffeb3b') {
   });
 }
 
-// --- 4. COMBAT & PROJECTILE SYSTEM ---
+// --- 4. PROJECTILE SYSTEM ---
 class Projectile {
   constructor(x, y, vx, vy, damage, isPlayer, isMissile = false, color = '#00e5ff') {
     this.x = x;
@@ -230,13 +236,13 @@ class Projectile {
 // --- 5. PLAYER CONTROLLER (CALM & ENCORE) ---
 class Player {
   constructor() {
-    this.charType = 'calm'; // 'calm' or 'encore'
+    this.charType = 'calm';
     this.x = 80;
     this.y = 190;
     this.vx = 0;
     this.vy = 0;
-    this.w = 18;
-    this.h = 30;
+    this.w = 26;
+    this.h = 42;
     this.facing = 1;
     this.hp = 100;
     this.maxHp = 100;
@@ -244,10 +250,9 @@ class Player {
     this.maxSpecial = 100;
     this.isGrounded = false;
     this.jumpCount = 0;
-    this.maxJumps = 2; // Calm has double jump
+    this.maxJumps = 2;
     this.invulnerableTimer = 0;
     
-    // Combo & action state
     this.comboStep = 0;
     this.comboResetTimer = 0;
     this.attackTimer = 0;
@@ -257,7 +262,6 @@ class Player {
     this.rollTimer = 0;
     this.rollCooldown = 0;
 
-    // Encore specific
     this.hasMinigun = false;
     this.shootCooldown = 0;
   }
@@ -265,18 +269,18 @@ class Player {
   swapChar() {
     this.charType = this.charType === 'calm' ? 'encore' : 'calm';
     this.maxJumps = this.charType === 'calm' ? 2 : 1;
-    addTextParticle(this.x, this.y - 15, `SWAP: ${this.charType.toUpperCase()}`, '#00e5ff');
-    addSpark(this.x, this.y, '#00e5ff', 12, 4);
+    addTextParticle(this.x, this.y - 25, `SWAP: ${this.charType.toUpperCase()}`, '#00e5ff');
+    addSpark(this.x, this.y, '#00e5ff', 14, 4);
     audio.playTone(520, 'sine', 0.1, 0.25);
   }
 
   takeDamage(amount) {
     if (this.invulnerableTimer > 0 || this.isDashing || this.isRolling) return;
     this.hp = Math.max(0, this.hp - amount);
-    this.invulnerableTimer = 45; // 0.75s i-frame
+    this.invulnerableTimer = 45;
     screenShakeTrauma = Math.min(1.0, screenShakeTrauma + 0.45);
     addSpark(this.x, this.y, '#ff1744', 10, 3.5);
-    addTextParticle(this.x, this.y - 10, `-${amount}`, '#ff1744');
+    addTextParticle(this.x, this.y - 15, `-${amount}`, '#ff1744');
     audio.playHit();
     gameState.damageTaken += amount;
     
@@ -289,6 +293,7 @@ class Player {
     if (this.invulnerableTimer > 0) this.invulnerableTimer--;
     if (this.rollCooldown > 0) this.rollCooldown--;
     if (this.shootCooldown > 0) this.shootCooldown--;
+    if (this.attackTimer > 0) this.attackTimer--;
     
     if (this.comboResetTimer > 0) {
       this.comboResetTimer--;
@@ -301,16 +306,16 @@ class Player {
 
     if (this.isDashing) {
       this.dashTimer--;
-      this.vx = this.facing * 8.5;
+      this.vx = this.facing * 9.0;
       this.vy = 0;
       addSpark(this.x, this.y + 10, '#ff0055', 3, 2.5);
       if (this.dashTimer <= 0) this.isDashing = false;
     } else if (this.isRolling) {
       this.rollTimer--;
-      this.vx = this.facing * 6.0;
+      this.vx = this.facing * 6.5;
       if (this.rollTimer <= 0) this.isRolling = false;
     } else {
-      const moveSpd = this.charType === 'calm' ? 3.5 : 3.0;
+      const moveSpd = this.charType === 'calm' ? 3.6 : 3.2;
       if (keys['a'] || keys['arrowleft']) {
         this.vx = -moveSpd;
         this.facing = -1;
@@ -326,7 +331,7 @@ class Player {
         if (!this.jumpKeyHeld) {
           this.jumpKeyHeld = true;
           if (this.isGrounded || this.jumpCount < this.maxJumps) {
-            this.vy = -7.4;
+            this.vy = -7.5;
             this.jumpCount++;
             this.isGrounded = false;
             audio.playTone(320, 'triangle', 0.1, 0.15);
@@ -341,7 +346,7 @@ class Player {
       if ((keys['s'] || keys['arrowdown']) && this.charType === 'encore' && this.rollCooldown <= 0) {
         this.isRolling = true;
         this.rollTimer = 16;
-        this.rollCooldown = 60;
+        this.rollCooldown = 55;
         this.invulnerableTimer = 22;
         audio.playTone(160, 'triangle', 0.1, 0.2);
       }
@@ -382,12 +387,12 @@ class Player {
     }
 
     if (!this.isDashing) {
-      this.vy += 0.4; // Gravity
+      this.vy += 0.42;
     }
     this.x += this.vx * timeScale;
     this.y += this.vy * timeScale;
 
-    // Platform Collisions (GDD Floor Logic)
+    // Platform Collisions
     const floorY = stage.getFloorY(this.x);
     if (this.y + this.h / 2 >= floorY) {
       this.y = floorY - this.h / 2;
@@ -398,7 +403,7 @@ class Player {
       this.isGrounded = false;
     }
 
-    // Gaps in Stage 1 / Stage 2: Falling damage & respawn
+    // Gap Fall
     if (this.y > 260) {
       this.takeDamage(15);
       this.x = Math.max(50, this.x - 120);
@@ -407,7 +412,6 @@ class Player {
       addTextParticle(this.x, this.y - 15, 'GAP FALL! -15 HP', '#ff1744');
     }
 
-    // Bounds
     if (this.x < 30) this.x = 30;
     if (this.x > stage.length - 40) this.x = stage.length - 40;
   }
@@ -415,21 +419,22 @@ class Player {
   executeKatanaCombo(stage) {
     this.comboStep = (this.comboStep % 3) + 1;
     this.comboResetTimer = 35;
+    this.attackTimer = 14;
     
     const hitBox = {
-      x: this.x + this.facing * 20,
+      x: this.x + this.facing * 24,
       y: this.y,
-      radius: 28,
-      damage: this.comboStep === 3 ? 28 : 14
+      radius: 32,
+      damage: this.comboStep === 3 ? 30 : 15
     };
 
     addSpark(hitBox.x, hitBox.y, '#ff0055', 8, 3.5);
     
-    // Parry / Deflect check
+    // Parry / Deflect
     for (let p of stage.projectiles) {
       if (!p.isPlayer && Math.hypot(p.x - hitBox.x, p.y - hitBox.y) < hitBox.radius + 15) {
         p.isPlayer = true;
-        p.vx = this.facing * 9.5;
+        p.vx = this.facing * 10;
         p.vy = (Math.random() - 0.5) * 2;
         p.color = '#00e5ff';
         p.damage = 40;
@@ -448,7 +453,7 @@ class Player {
       }
     });
 
-    if (stage.boss && Math.hypot(stage.boss.x - hitBox.x, stage.boss.y - hitBox.y) < hitBox.radius + 35) {
+    if (stage.boss && Math.hypot(stage.boss.x - hitBox.x, stage.boss.y - hitBox.y) < hitBox.radius + 40) {
       stage.boss.takeDamage(hitBox.damage);
       hitAny = true;
     }
@@ -460,8 +465,7 @@ class Player {
         audio.playFinisherSlash();
         hitStopFrames = 4;
         screenShakeTrauma = 0.35;
-        // Crescent wave projectile
-        stage.projectiles.push(new Projectile(this.x, this.y, this.facing * 7.5, 0, 20, true, false, '#ff0055'));
+        stage.projectiles.push(new Projectile(this.x, this.y, this.facing * 8.0, 0, 22, true, false, '#ff0055'));
       } else {
         audio.playSlash();
         hitStopFrames = 2;
@@ -473,10 +477,11 @@ class Player {
 
   executeGunslingerShot(stage) {
     if (this.shootCooldown > 0) return;
+    this.attackTimer = 10;
     
     if (this.hasMinigun) {
       this.shootCooldown = 4;
-      stage.projectiles.push(new Projectile(this.x + this.facing * 16, this.y - 2, this.facing * 11, (Math.random() - 0.5) * 1.5, 16, true, false, '#ffd700'));
+      stage.projectiles.push(new Projectile(this.x + this.facing * 20, this.y - 2, this.facing * 12, (Math.random() - 0.5) * 1.5, 18, true, false, '#ffd700'));
       audio.playMinigun();
       screenShakeTrauma = Math.min(0.4, screenShakeTrauma + 0.08);
       this.special = Math.min(this.maxSpecial, this.special + 1);
@@ -484,7 +489,7 @@ class Player {
       this.shootCooldown = 12;
       for (let i = 0; i < 3; i++) {
         setTimeout(() => {
-          stage.projectiles.push(new Projectile(this.x + this.facing * 12, this.y - 2, this.facing * 8.5, (Math.random() - 0.5) * 1, 9, true, false, '#00e5ff'));
+          stage.projectiles.push(new Projectile(this.x + this.facing * 16, this.y - 2, this.facing * 9.0, (Math.random() - 0.5) * 1, 10, true, false, '#00e5ff'));
           audio.playSMG();
           this.special = Math.min(this.maxSpecial, this.special + 2);
         }, i * 40);
@@ -510,19 +515,19 @@ class Player {
       addTextParticle(this.x, this.y - 15, 'CRIMSON DASH-SLASH!', '#ff0055');
 
       stage.enemies.forEach(e => {
-        if (Math.abs(e.y - this.y) < 30 && (e.x - this.x) * this.facing > 0 && Math.abs(e.x - this.x) < 150) {
-          e.takeDamage(45, this.facing);
+        if (Math.abs(e.y - this.y) < 30 && (e.x - this.x) * this.facing > 0 && Math.abs(e.x - this.x) < 160) {
+          e.takeDamage(50, this.facing);
           gameState.addHit();
         }
       });
-      if (stage.boss && Math.abs(stage.boss.x - this.x) < 150) {
-        stage.boss.takeDamage(45);
+      if (stage.boss && Math.abs(stage.boss.x - this.x) < 160) {
+        stage.boss.takeDamage(50);
         gameState.addHit();
       }
     } else {
       addTextParticle(this.x, this.y - 15, 'INCENDIARY GRENADE!', '#ff9800');
       audio.playTone(360, 'sawtooth', 0.2, 0.25);
-      const gx = this.x + this.facing * 85;
+      const gx = this.x + this.facing * 90;
       const gy = this.y;
       
       setTimeout(() => {
@@ -533,13 +538,13 @@ class Player {
         addSpark(gx, gy, '#ffeb3b', 20, 5);
 
         stage.enemies.forEach(e => {
-          if (Math.hypot(e.x - gx, e.y - gy) < 80) {
-            e.takeDamage(60, Math.sign(e.x - gx));
+          if (Math.hypot(e.x - gx, e.y - gy) < 85) {
+            e.takeDamage(65, Math.sign(e.x - gx));
             gameState.addHit();
           }
         });
-        if (stage.boss && Math.hypot(stage.boss.x - gx, stage.boss.y - gy) < 90) {
-          stage.boss.takeDamage(60);
+        if (stage.boss && Math.hypot(stage.boss.x - gx, stage.boss.y - gy) < 95) {
+          stage.boss.takeDamage(65);
           gameState.addHit();
         }
       }, 400);
@@ -553,58 +558,51 @@ class Player {
     const ry = this.y - camera.y;
 
     // Shadow
-    g.fillStyle = 'rgba(0,0,0,0.45)';
+    g.fillStyle = 'rgba(0,0,0,0.5)';
     g.beginPath();
-    g.ellipse(rx, ry + this.h / 2 + 2, 11, 4, 0, 0, Math.PI * 2);
+    g.ellipse(rx, ry + this.h / 2 + 3, 14, 5, 0, 0, Math.PI * 2);
     g.fill();
 
-    if (this.charType === 'calm') {
-      // CALM: Tactical assassin jacket, Katana
-      g.fillStyle = '#1c152d';
-      g.fillRect(rx - 7, ry - 15, 14, 26);
-      g.fillStyle = '#00e5ff'; // Cyan bandana
-      g.fillRect(rx - 6, ry - 13, 12, 5);
-      g.fillStyle = '#ff0055'; // Crimson sash
-      g.fillRect(rx - 7, ry + 1, 14, 4);
-      
-      // Katana Blade
-      g.strokeStyle = '#ffffff';
-      g.lineWidth = 2.5;
-      g.beginPath();
-      if (this.comboStep > 0) {
-        g.moveTo(rx + this.facing * 4, ry - 4);
-        g.lineTo(rx + this.facing * 20, ry + 6);
-      } else {
-        g.moveTo(rx - this.facing * 4, ry + 10);
-        g.lineTo(rx - this.facing * 12, ry - 12);
-      }
-      g.stroke();
-    } else {
-      // ENCORE: Streetwear hoodie, dual SMGs / Minigun
-      g.fillStyle = '#261e38';
-      g.fillRect(rx - 8, ry - 15, 16, 26);
-      g.fillStyle = '#ffd700'; // Gold cap / chain
-      g.fillRect(rx - 6, ry - 15, 12, 5);
-      g.fillStyle = '#ff9800'; // Orange tactical straps
-      g.fillRect(rx - 8, ry + 2, 16, 3);
+    // RENDER AUTHENTIC EXTRACTED SPRITE
+    g.save();
+    g.translate(rx, ry);
+    if (this.facing < 0) {
+      g.scale(-1, 1);
+    }
 
-      g.fillStyle = this.hasMinigun ? '#e91e63' : '#b0bec5';
-      if (this.hasMinigun) {
-        g.fillRect(rx + this.facing * 2, ry - 3, this.facing * 16, 7);
+    if (this.charType === 'calm') {
+      const spr = (this.attackTimer > 0 && ASSETS.spriteCalmAttack.complete) 
+        ? ASSETS.spriteCalmAttack 
+        : ASSETS.spriteCalm;
+        
+      if (spr.complete) {
+        g.drawImage(spr, -24, -26, 48, 52);
       } else {
-        g.fillRect(rx + this.facing * 4, ry - 5, this.facing * 8, 4);
-        g.fillRect(rx + this.facing * 2, ry + 2, this.facing * 7, 4);
+        g.fillStyle = '#00e5ff';
+        g.fillRect(-10, -20, 20, 40);
+      }
+    } else {
+      const spr = (this.attackTimer > 0 && ASSETS.spriteEncoreShoot.complete) 
+        ? ASSETS.spriteEncoreShoot 
+        : ASSETS.spriteEncore;
+
+      if (spr.complete) {
+        g.drawImage(spr, -24, -26, 48, 52);
+      } else {
+        g.fillStyle = '#ffd700';
+        g.fillRect(-10, -20, 20, 40);
       }
     }
+    g.restore();
   }
 }
 
-// --- 6. ENEMY AI & BOSS FIGHTS ---
+// --- 6. ENEMY ROSTER (GRUNT, PISTOL THUG, SHIELD BRUISER) ---
 class Enemy {
   constructor(x, y, type = 'grunt') {
     this.x = x;
     this.y = y;
-    this.type = type; // 'grunt', 'pistol', 'shield'
+    this.type = type;
     this.facing = -1;
     this.active = true;
     this.vx = 0;
@@ -614,32 +612,29 @@ class Enemy {
 
     if (type === 'grunt') {
       this.hp = 25;
-      this.w = 16;
-      this.h = 28;
+      this.w = 24;
+      this.h = 42;
       this.speed = 1.4;
       this.damage = 10;
-      this.color = '#7e57c2';
     } else if (type === 'pistol') {
       this.hp = 30;
-      this.w = 16;
-      this.h = 28;
+      this.w = 24;
+      this.h = 42;
       this.speed = 1.0;
       this.damage = 12;
-      this.color = '#26a69a';
     } else if (type === 'shield') {
       this.hp = 70;
-      this.w = 20;
-      this.h = 30;
+      this.w = 28;
+      this.h = 44;
       this.speed = 0.7;
       this.damage = 16;
-      this.color = '#ef5350';
       this.shieldUp = true;
     }
   }
 
   takeDamage(amount, hitDir) {
     if (this.type === 'shield' && this.shieldUp && hitDir !== this.facing) {
-      addTextParticle(this.x, this.y - 12, 'SHIELD BLOCKED!', '#ffd700');
+      addTextParticle(this.x, this.y - 15, 'SHIELD BLOCKED!', '#ffd700');
       addSpark(this.x, this.y, '#ffd700', 8, 3);
       audio.playTone(800, 'square', 0.05, 0.15);
       this.shieldUp = false;
@@ -649,14 +644,14 @@ class Enemy {
 
     this.hp -= amount;
     this.vx = hitDir * 3.5;
-    addSpark(this.x, this.y, this.color, 6, 2.5);
+    addSpark(this.x, this.y, '#ff0055', 6, 2.5);
     addTextParticle(this.x, this.y - 10, `-${amount}`, '#fff');
     audio.playHit();
 
     if (this.hp <= 0) {
       this.active = false;
       gameState.kills++;
-      addSpark(this.x, this.y, '#ff0055', 15, 4.5);
+      addSpark(this.x, this.y, '#ff0055', 16, 4.5);
     }
   }
 
@@ -665,7 +660,7 @@ class Enemy {
     this.facing = Math.sign(player.x - this.x) || -1;
 
     if (this.type === 'grunt') {
-      if (dist > 22) {
+      if (dist > 25) {
         this.x += this.facing * this.speed * timeScale;
       } else {
         this.attackTimer++;
@@ -683,12 +678,12 @@ class Enemy {
         this.aimLaserTimer++;
         if (this.aimLaserTimer >= 50) {
           this.aimLaserTimer = 0;
-          stage.projectiles.push(new Projectile(this.x, this.y - 2, this.facing * 5.8, 0, this.damage, false, false, '#ff1744'));
+          stage.projectiles.push(new Projectile(this.x, this.y - 4, this.facing * 5.8, 0, this.damage, false, false, '#ff1744'));
           audio.playTone(700, 'sawtooth', 0.05, 0.12);
         }
       }
     } else if (this.type === 'shield') {
-      if (dist > 26) {
+      if (dist > 28) {
         this.x += this.facing * this.speed * timeScale;
       } else {
         this.attackTimer++;
@@ -712,27 +707,36 @@ class Enemy {
       g.lineWidth = 1;
       g.setLineDash([4, 2]);
       g.beginPath();
-      g.moveTo(rx, ry - 2);
-      g.lineTo(rx + this.facing * 180, ry - 2);
+      g.moveTo(rx, ry - 4);
+      g.lineTo(rx + this.facing * 180, ry - 4);
       g.stroke();
       g.setLineDash([]);
     }
 
-    g.fillStyle = 'rgba(0,0,0,0.35)';
+    g.fillStyle = 'rgba(0,0,0,0.4)';
     g.beginPath();
-    g.ellipse(rx, ry + this.h / 2 + 2, 8, 3, 0, 0, Math.PI * 2);
+    g.ellipse(rx, ry + this.h / 2 + 2, 12, 4, 0, 0, Math.PI * 2);
     g.fill();
 
-    g.fillStyle = this.color;
-    g.fillRect(rx - this.w / 2, ry - this.h / 2, this.w, this.h);
-
-    g.fillStyle = '#ff1744';
-    g.fillRect(rx + this.facing * 2, ry - 8, 3, 2);
-
-    if (this.type === 'shield' && this.shieldUp) {
-      g.fillStyle = '#b0bec5';
-      g.fillRect(rx + this.facing * 8, ry - 14, 5, 28);
+    // RENDER EXTRACTED ENEMY SPRITES
+    g.save();
+    g.translate(rx, ry);
+    if (this.facing < 0) {
+      g.scale(-1, 1);
     }
+
+    let spr = ASSETS.spriteEnemyGrunt;
+    if (this.type === 'pistol') spr = ASSETS.spriteEnemyPistol;
+    if (this.type === 'shield') spr = ASSETS.spriteEnemyShield;
+
+    if (spr.complete) {
+      g.drawImage(spr, -22, -26, 44, 52);
+    } else {
+      g.fillStyle = '#7e57c2';
+      g.fillRect(-10, -20, 20, 40);
+    }
+
+    g.restore();
   }
 }
 
@@ -785,14 +789,11 @@ class ChopperBoss {
     const rx = this.x - camera.x;
     const ry = this.y - camera.y;
 
-    // Use extracted production helicopter asset if loaded
-    if (ASSETS.helicopterBoss.complete) {
-      g.drawImage(ASSETS.helicopterBoss, rx - 60, ry - 30, 120, 60);
+    if (ASSETS.spriteChopper.complete) {
+      g.drawImage(ASSETS.spriteChopper, rx - 70, ry - 35, 140, 70);
     } else {
       g.fillStyle = '#b71c1c';
-      g.fillRect(rx - 30, ry - 14, 60, 24);
-      g.fillStyle = '#e0e0e0';
-      g.fillRect(rx - 45 + (Math.sin(this.timer * 0.8) * 10), ry - 22, 90, 4);
+      g.fillRect(rx - 35, ry - 16, 70, 28);
     }
   }
 }
@@ -805,8 +806,8 @@ class MutantNoobda {
     this.hp = 600;
     this.maxHp = 600;
     this.active = true;
-    this.w = 38;
-    this.h = 52;
+    this.w = 44;
+    this.h = 60;
     this.facing = -1;
     this.timer = 0;
     this.state = 'idle';
@@ -846,7 +847,7 @@ class MutantNoobda {
     } else if (this.state === 'charge') {
       this.chargeTimer--;
       this.x += this.facing * 4.6 * timeScale;
-      if (Math.abs(player.x - this.x) < 30 && Math.abs(player.y - this.y) < 30) {
+      if (Math.abs(player.x - this.x) < 32 && Math.abs(player.y - this.y) < 32) {
         player.takeDamage(24);
       }
       if (this.chargeTimer <= 0) this.state = 'idle';
@@ -883,23 +884,28 @@ class MutantNoobda {
       g.fillRect(rx + (this.facing > 0 ? 10 : -240), ry - 2, 240, 4);
     }
 
-    g.fillStyle = 'rgba(0,0,0,0.45)';
+    g.fillStyle = 'rgba(0,0,0,0.5)';
     g.beginPath();
-    g.ellipse(rx, ry + this.h / 2 + 2, 18, 6, 0, 0, Math.PI * 2);
+    g.ellipse(rx, ry + this.h / 2 + 2, 22, 7, 0, 0, Math.PI * 2);
     g.fill();
 
-    if (ASSETS.mutantBoss.complete) {
-      g.drawImage(ASSETS.mutantBoss, rx - 35, ry - 35, 70, 70);
+    g.save();
+    g.translate(rx, ry);
+    if (this.facing > 0) {
+      g.scale(-1, 1);
+    }
+
+    if (ASSETS.spriteMutantNoobda.complete) {
+      g.drawImage(ASSETS.spriteMutantNoobda, -36, -36, 72, 72);
     } else {
       g.fillStyle = '#4a148c';
-      g.fillRect(rx - 18, ry - 26, 36, 52);
-      g.fillStyle = '#76ff03';
-      g.fillRect(rx - 14, ry - 14, 28, 4);
+      g.fillRect(-20, -30, 40, 60);
     }
+    g.restore();
   }
 }
 
-// --- 7. STAGE BLUEPRINTS & PRODUCTION PARALLAX ---
+// --- 7. STAGE BLUEPRINT & PARALLAX ---
 class StageBlueprint {
   constructor(stageNum) {
     this.stageNum = stageNum;
@@ -912,13 +918,13 @@ class StageBlueprint {
 
   getFloorY(x) {
     if (this.stageNum === 1) {
-      if (x > 500 && x < 610) return 320; // Rooftop gap 1
-      if (x > 1050 && x < 1170) return 320; // Rooftop gap 2
+      if (x > 500 && x < 610) return 320;
+      if (x > 1050 && x < 1170) return 320;
       return 210;
     } else if (this.stageNum === 2) {
-      return 200; // Metro train top
+      return 200;
     } else {
-      return 210; // Arena stage floor
+      return 210;
     }
   }
 
@@ -944,11 +950,7 @@ class StageBlueprint {
   }
 
   drawParallax(g) {
-    const bgOffset = camera.x * 0.15;
-    const midOffset = camera.x * 0.45;
-
     if (this.stageNum === 1) {
-      // Production Rooftops Dusk from Naamcheen video
       if (ASSETS.bgStage1.complete) {
         g.drawImage(ASSETS.bgStage1, 0, 0, VIEW_W, VIEW_H);
       } else {
@@ -972,7 +974,6 @@ class StageBlueprint {
       g.fillRect(1170 - camera.x, 210 - camera.y, 430, 3);
 
     } else if (this.stageNum === 2) {
-      // Production Metro Train Sunset from Naamcheen video
       if (ASSETS.bgStage2.complete) {
         g.drawImage(ASSETS.bgStage2, 0, 0, VIEW_W, VIEW_H);
       } else {
@@ -984,14 +985,12 @@ class StageBlueprint {
         g.fillRect(0, 0, VIEW_W, VIEW_H);
       }
 
-      // Train roof surface
       g.fillStyle = '#263238';
       g.fillRect(0 - camera.x, 200 - camera.y, this.length, 80);
       g.fillStyle = '#ffd700';
       g.fillRect(0 - camera.x, 200 - camera.y, this.length, 3);
 
     } else {
-      // Production Concert Stage from Naamcheen video
       if (ASSETS.bgStage3.complete) {
         g.drawImage(ASSETS.bgStage3, 0, 0, VIEW_W, VIEW_H);
       } else {
@@ -999,7 +998,6 @@ class StageBlueprint {
         g.fillRect(0, 0, VIEW_W, VIEW_H);
       }
 
-      // Dynamic Spotlights
       g.fillStyle = 'rgba(0, 229, 255, 0.16)';
       g.beginPath();
       g.moveTo(VIEW_W / 2, 0);
@@ -1007,7 +1005,6 @@ class StageBlueprint {
       g.lineTo(VIEW_W / 2 + 130 + Math.sin(Date.now() * 0.003) * 110, VIEW_H);
       g.fill();
 
-      // Concert Stage Floor
       g.fillStyle = '#1b122e';
       g.fillRect(0 - camera.x, 210 - camera.y, this.length, 70);
       g.fillStyle = '#00e5ff';
@@ -1016,7 +1013,7 @@ class StageBlueprint {
   }
 }
 
-// --- 8. STATE MANAGER & FLOW CONTROLLER ---
+// --- 8. STATE MANAGER ---
 class GameState {
   constructor() {
     this.stageNum = 1;
@@ -1051,7 +1048,6 @@ class GameState {
     document.getElementById('game-over-overlay').classList.add('hidden');
     document.getElementById('stage-clear-banner').classList.add('hidden');
 
-    // Stage 1 Opening Dialogue from GDD
     setTimeout(() => {
       this.triggerDialogue(
         'NOOBDA',
@@ -1120,7 +1116,6 @@ class GameState {
         timeScale = 1.0;
         this.state = 'playing';
         
-        // Final Co-Op Finisher
         audio.playFinisherSlash();
         audio.playExplosion();
         screenShakeTrauma = 1.0;
@@ -1140,7 +1135,6 @@ class GameState {
       return;
     }
 
-    // Show Stage Clear Banner
     const banner = document.getElementById('stage-clear-banner');
     const title = document.getElementById('stage-clear-title');
     const sub = document.getElementById('stage-clear-sub');
@@ -1158,7 +1152,7 @@ class GameState {
       this.player.y = 180;
       
       if (this.stageNum === 2) {
-        this.player.hasMinigun = true; // Minigun crate pickup
+        this.player.hasMinigun = true;
         addTextParticle(this.player.x, this.player.y - 20, 'MINIGUN CRATE EQUIPPED!', '#ffd700');
         this.triggerDialogue(
           'ENCORE',
@@ -1200,7 +1194,7 @@ class GameState {
 
 const gameState = new GameState();
 
-// UI Interactions
+// UI Listeners
 document.querySelectorAll('.char-card').forEach(card => {
   card.addEventListener('click', () => {
     document.querySelectorAll('.char-card').forEach(c => c.classList.remove('active'));
@@ -1231,7 +1225,6 @@ function gameLoop() {
   ctx.save();
   ctx.scale(SCALE, SCALE);
 
-  // Screen Shake Trauma
   if (screenShakeTrauma > 0) {
     const shakeX = (Math.random() - 0.5) * screenShakeTrauma * 12;
     const shakeY = (Math.random() - 0.5) * screenShakeTrauma * 12;
@@ -1266,26 +1259,25 @@ function gameLoop() {
         proj.update();
         if (proj.isPlayer) {
           stage.enemies.forEach(e => {
-            if (Math.hypot(e.x - proj.x, e.y - proj.y) < 18) {
+            if (Math.hypot(e.x - proj.x, e.y - proj.y) < 20) {
               e.takeDamage(proj.damage, Math.sign(proj.vx));
               proj.active = false;
               gameState.addHit();
             }
           });
-          if (stage.boss && Math.hypot(stage.boss.x - proj.x, stage.boss.y - proj.y) < 32) {
+          if (stage.boss && Math.hypot(stage.boss.x - proj.x, stage.boss.y - proj.y) < 35) {
             stage.boss.takeDamage(proj.damage);
             proj.active = false;
             gameState.addHit();
           }
         } else {
-          if (Math.hypot(p.x - proj.x, p.y - proj.y) < 15) {
+          if (Math.hypot(p.x - proj.x, p.y - proj.y) < 18) {
             p.takeDamage(proj.damage);
             proj.active = false;
           }
         }
       });
 
-      // Advance stage when enemies and boss are cleared
       if (stage.enemies.length === 0 && (!stage.boss || !stage.boss.active)) {
         if (p.x >= stage.length - 80) {
           gameState.nextStage();
@@ -1324,7 +1316,7 @@ function gameLoop() {
       ctx.restore();
     }
 
-    // --- HUD (Top Left & Center) ---
+    // --- HUD RENDER ---
     ctx.fillStyle = '#1c132d';
     ctx.fillRect(10, 10, 90, 8);
     ctx.fillStyle = '#ff1744';
